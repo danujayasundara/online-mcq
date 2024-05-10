@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitor Started Exam</title>
+  <link rel="stylesheet" th:href="@{../css/styles.css}">
+</head>
+<body>
+  <header>
+    <div class="mainheader">
+      <img src="image/logo.png" alt="Logo">
+      <h1>Edueye</h1>
+    </div>
+  </header>
+  <div class="teachermain">
+    <div class="tdashboard">
+      <ul>
+        <li><a th:href="@{/admin-page}">Home</a></li>
+        <li><a th:href="@{/exams}">Exam</a></li>
+        <li><a th:href="@{/logout}">Logout</a></li>
+      </ul>
+    </div>
+    <div class="attendancemain">
+        <div class="examtime">
+            <h3>Exam Name</h3>
+            <div class="attleft">
+                <div class="atttopleft">
+                    <div class="timeleft">
+                        <table id="timelefttable">
+                            <tr>
+                                <td>Exam Completed</td>
+                            </tr>
+                            <tr>
+                                <th>time</th>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="attbottomleft">
+                    <div class="Startedending">
+                    <div id="duration" th:text="${duration}" style="display: none;"></div>
+                        <table id="startendtimetable">
+                            <tr>
+                                <th>Exam Started Time</th>
+                                <td id = "startTime"></td>
+                            </tr>
+                            <tr>
+                                <th>Exam Ending Time</th>
+                                <td id = "endTime"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="attright">
+                <div class="attstudent">
+                    <table id="attendingstulist">
+                        <tr>
+                            <td>Attending Student List</td>
+                        </tr>
+                        <tr>
+                            <td>Student 1</td>
+                            <td>status</td>
+                        </tr>
+                        <tbody>
+				            <!--<tr th:each="fullName : ${fullNames}">
+					            <td th:text="${fullName}"></td>
+					            
+					        </tr>-->
+					        <tr th:each="info : ${attemptInfos}">
+					            <td th:text="${info.name}"></td>
+					            <td th:text="${info.status ? 'Completed' : ''}"></td>
+					        </tr>
+			        	</tbody>
+                    </table>
+                </div>
+                <div class="endexam">
+                    <table id="endexambtn" align="right">
+                        <tr>
+                            <td><button id="endExamButton">End Exam</button></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+  </div>
+  <script>
+	
+	  setInterval(function() {
+	    location.reload();
+		}, 50000);
+	
+	document.addEventListener('DOMContentLoaded', function() {
+	    let storedTime = localStorage.getItem('currentTime');
+	
+	    if (storedTime && !isNaN(parseInt(storedTime))) {
+	        let timestamp = parseInt(storedTime);
+	
+	        let currentDate = new Date(timestamp);
+	
+	        let hours = currentDate.getHours();
+	        let minutes = currentDate.getMinutes();
+	        let seconds = currentDate.getSeconds();
+	
+	        let formattedTime = `${hours}:${minutes}:${seconds}`;
+	
+	        console.log('Formatted Time:', formattedTime);
+	        document.getElementById('startTime').textContent = formattedTime;
+	    } else {
+	        console.error('Invalid or missing stored timestamp.');
+	    }
+	});
+	
+	document.addEventListener('DOMContentLoaded', function() {
+	    let durationElement = document.getElementById('duration');
+	    let duration = durationElement.textContent.trim();
+	
+	    localStorage.setItem('duration', duration);
+	    console.log('Duration stored in localStorage:', duration);
+	   
+	    let currentTime = new Date();
+	    let endTime = new Date(currentTime.getTime() + duration * 60000);
+	    console.log('End Time stored in localStorage:', endTime);
+	    localStorage.setItem('endTime', endTime);
+	
+	    let formattedEndTime = `${endTime.getHours()}:${endTime.getMinutes()}:${endTime.getSeconds()}`;
+	    console.log('Formatted End Time:', formattedEndTime);
+	
+	    document.getElementById('endTime').textContent = formattedEndTime;
+	});
+	
+	document.addEventListener('DOMContentLoaded', function() {
+	    document.getElementById('endExamButton').addEventListener('click', function() {
+	        window.location.href = '/exams';
+	    });
+	});
+	
+
+  </script>
+
+  <footer>
+    <div class="mainfooter">
+      &copy; 2024 EduEye. All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>
