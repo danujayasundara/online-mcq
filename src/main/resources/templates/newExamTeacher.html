@@ -157,7 +157,7 @@
               
             </div>
             <form id = "examForm" th:action="@{/saveExam}" th:object="${exam}" method="post" class="form-inline">
-            <input type="text" id="examId" name="examId">
+            
             <input type="text" id="inputExam" name= "inputExam" placeholder="Exam Name" th:value="''" th:field="*{exam_name}">
               <div class="form-group mr-2">
                   <label for="examDateTime" class="mr-2">Exam Date Time:</label>
@@ -181,7 +181,7 @@
               <form th:action="@{/saveQuestion}" method="post" id="questionForm" > <!--style="display: none;"-->
               
 			    <input type="text" id = "question_content" name="question_content" placeholder="Enter question " th:value="${question_content}" required>
-			    <input type="text" id="quesId" name="quesId">
+			    
 			   	
         		<div class="form-group">
 			        <input type="radio" id = "correctAnswer" name="correctAnswer" value="answer1" > <!--th:checked="${correctAnswer == 'answer1'}"-->
@@ -334,71 +334,73 @@
 			}
 			document.getElementById('publish').onclick=publishExam;
 			
-			function saveQuestion() {
-		        const questionInput = document.getElementById('question_content').value;
-		        const answer1Input = document.getElementById('answer1').value;
-		        const answer2Input = document.getElementById('answer2').value;
-		        const answer3Input = document.getElementById('answer3').value;
-		        const answer4Input = document.getElementById('answer4').value;
-		        const correctAnswerInput = document.querySelector('input[name="correctAnswer"]:checked');
-		        
-		        if (!correctAnswerInput) {
-			        alert('Please select the correct answer.');
-			        return;
-			    }
+		function saveQuestion() {
+		    const questionInput = document.getElementById('question_content').value;
+		    const answer1Input = document.getElementById('answer1').value;
+		    const answer2Input = document.getElementById('answer2').value;
+		    const answer3Input = document.getElementById('answer3').value;
+		    const answer4Input = document.getElementById('answer4').value;
+		    const correctAnswerInput = document.querySelector('input[name="correctAnswer"]:checked');
 		
-		    	const correctAnswerValue = correctAnswerInput.value;
-		    	const oldQId = localStorage.getItem('questionId');
-		    	let questions = JSON.parse(localStorage.getItem('questions')) || [];
-		    	const existingQuestion = questions.find(q => q.oldQId === oldQId);
-		    	const oldAns1 = localStorage.getItem('answer1');
-		    	const oldAns2 = localStorage.getItem('answer2');
-		    	const oldAns3 = localStorage.getItem('answer3');
-		    	const oldAns4 = localStorage.getItem('answer4');
-		    	if (existingQuestion) {
-			        // Update existing answer if answerId matches
-			        existingQuestion.answers.forEach(answer => {
-			            if (answer.key === "answer1" && answer.answerId === oldAns1) {
-			                answer.answer = answer1Input;
-			                answer.isCorrectAnswer = correctAnswerValue === 'answer1';
-			            }
-			            if (answer.key === "answer2" && answer.answerId === oldAns2) {
-			                answer.answer = answer2Input;
-			                answer.isCorrectAnswer = correctAnswerValue === 'answer2';
-			            }
-			            if (answer.key === "answer3" && answer.answerId === oldAns3) {
-			                answer.answer = answer3Input;
-			                answer.isCorrectAnswer = correctAnswerValue === 'answer3';
-			            }
-			            if (answer.key === "answer4" && answer.answerId === oldAns4) {
-			                answer.answer = answer4Input;
-			                answer.isCorrectAnswer = correctAnswerValue === 'answer4';
-			            }
-			        });
-			    } else {
-					const questionData = {
-			            question: questionInput,
-			            answers: [
-			                { answer: answer1Input, key: "answer1", isCorrectAnswer: correctAnswerValue === 'answer1' },
-			                { answer: answer2Input, key: "answer2", isCorrectAnswer: correctAnswerValue === 'answer2' },
-			                { answer: answer3Input, key: "answer3", isCorrectAnswer: correctAnswerValue === 'answer3' },
-			                { answer: answer4Input, key: "answer4", isCorrectAnswer: correctAnswerValue === 'answer4' }
-			            ]
-			        };
-			        console.log('questionData',questionData);
-			
-			        // existing questions from localStorage or empty array
-			       // let questions = JSON.parse(localStorage.getItem('questions')) || []; old eka
-			        
-			        questions.push(questionData);
-			
-			        localStorage.setItem('questions', JSON.stringify(questions));
-				}
+		    if (!correctAnswerInput) {
+		        alert('Please select the correct answer.');
+		        return;
+		    }
 		
-		        document.getElementById('questionForm').reset();
-		
-		        alert('Question added successfully!');
-	    }
+		    const correctAnswerValue = correctAnswerInput.value;
+		    const oldQId = localStorage.getItem('questionId');
+		    let questions = JSON.parse(localStorage.getItem('questions')) || [];
+		    const existingQuestion = questions.find(q => q.questionId === oldQId);
+		    const oldAns1 = localStorage.getItem('answer1');
+		    const oldAns2 = localStorage.getItem('answer2');
+		    const oldAns3 = localStorage.getItem('answer3');
+		    const oldAns4 = localStorage.getItem('answer4');
+		    
+		    const answers = [
+		        { 
+		            answerId: (oldAns1 === null) ? -1 : parseInt(oldAns1),
+		            answer: answer1Input, 
+		            key: "answer1", 
+		            isCorrectAnswer: correctAnswerValue === 'answer1' 
+		        },
+		        { 
+		            answerId: (oldAns2 === null) ? -1 : parseInt(oldAns2),
+		            answer: answer2Input, 
+		            key: "answer2", 
+		            isCorrectAnswer: correctAnswerValue === 'answer2' 
+		        },
+		        { 
+		            answerId: (oldAns3 === null) ? -1 : parseInt(oldAns3),
+		            answer: answer3Input, 
+		            key: "answer3", 
+		            isCorrectAnswer: correctAnswerValue === 'answer3' 
+		        },
+		        { 
+		            answerId: (oldAns4 === null) ? -1 : parseInt(oldAns4),
+		            answer: answer4Input, 
+		            key: "answer4", 
+		            isCorrectAnswer: correctAnswerValue === 'answer4' 
+		        }
+		    ];
+
+  
+		    const questionData = {
+		        question: questionInput,
+		        answers: answers
+		    };
+		   
+		    questions.push(questionData);
+		    
+		    localStorage.setItem('questions', JSON.stringify(questions));
+		    document.getElementById('questionForm').reset();
+		    alert('Question added successfully!');
+		}
+
+    //document.getElementById('questionForm').reset();
+
+    // alert('Question added successfully!');
+
+
 	
 	    $('#addQuestionBtn').click(saveQuestion);
 	    
@@ -465,7 +467,7 @@
 					// const questionId = localstorage.getItem('questionId',questionId)
 			        const questions = JSON.parse(localStorage.getItem('questions')) || [];
 			      	const oldQId = localStorage.getItem('questionId');
-			        if (oldQId === ''){
+			        if (oldQId === null){
 						const formattedQuestions = questions.map(question => ({
 					        	questionId: -1,
 						        question: question.question,
@@ -590,10 +592,10 @@
                     $('#answer4').val(response.answers[3].answer);
                     
                     localStorage.setItem('questionId',response.questionId);
-                    localStorage.setItem('answer1',response.answers[0].answer);
-                    localStorage.setItem('answer2',response.answers[1].answer);
-                    localStorage.setItem('answer3',response.answers[2].answer);
-                    localStorage.setItem('answer4',response.answers[3].answer);
+                    localStorage.setItem('answer1',response.answers[0].answerId);
+                    localStorage.setItem('answer2',response.answers[1].answerId);
+                    localStorage.setItem('answer3',response.answers[2].answerId);
+                    localStorage.setItem('answer4',response.answers[3].answerId);
                     questionIdValue = response.questionId;
                     // console.log('Question ID assigned inside AJAX success:', questionIdValue);
                     
@@ -619,9 +621,7 @@
             });
         });
     });
-    
-    // console.log("localStorage value");
-    // console.log('Question ID**///:', questionIdValue);
+   
 	
 	
 	
