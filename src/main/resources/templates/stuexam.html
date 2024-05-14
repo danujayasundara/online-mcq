@@ -119,17 +119,17 @@
 	    
 	    //end exam for students
 		document.addEventListener('DOMContentLoaded', function() {
-		    // Check if ended exam IDs are already stored in localStorage
+		    
 		    var storedEndedExamIds = JSON.parse(localStorage.getItem('endedExamIds'));
 		
-		    // Fetch the list of ended exam IDs from the backend if not stored in localStorage
+		    
 		    $.ajax({
-		        url: '/ended-exams', // Adjust the URL to match your backend endpoint
+		        url: '/ended-exams', 
 		        method: 'GET',
 		        success: function(response) {
 		            console.log('Ended Exam IDs:', response);
-		            localStorage.setItem('endedExamIds', JSON.stringify(response)); // Store the response in localStorage
-		            disableEndedExamLinks(response); // Pass stored exam IDs to the function
+		            localStorage.setItem('endedExamIds', JSON.stringify(response)); 
+		            disableEndedExamLinks(response); 
 		        },
 		        error: function(xhr, status, error) {
 		            console.error('Error fetching ended exam IDs:', error);
@@ -140,19 +140,19 @@
 		
 		    function disableEndedExamLinks(storedEndedExamIds) {
 		        var examLinks = document.querySelectorAll('.examLink');
-		        var examIds = []; // Array to store all exam IDs
+		        var examIds = []; 
 		
 		        examLinks.forEach(function(link) {
 		            var href = link.getAttribute('href');
 		            if (href) {
-		                var examId = href.split('/')[1]; // Extract the exam ID from the href
-		                if (examId) { // Check if examId is not null or undefined
-		                    examIds.push(examId); // Add the exam ID to the array
+		                var examId = href.split('/')[1]; 
+		                if (examId) { 
+		                    examIds.push(examId); 
 		                    console.log('Exam ID from link:', examId);
 		
-		                    // Check if the exam ID is in the list of ended exam IDs
+		                    
 		                    if (storedEndedExamIds.includes(parseInt(examId))) {
-		                        disableExamLink(link); // Disable the link if the exam is ended
+		                        disableExamLink(link); 
 		                    }
 		                }
 		            }
@@ -174,7 +174,7 @@
 		    }
 		
 		    function enableExamLink(link) {
-		        // Optionally, you can add specific styling or behavior for enabled links here if needed
+		        
 		    }
 		});
 

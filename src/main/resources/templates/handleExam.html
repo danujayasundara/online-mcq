@@ -184,7 +184,7 @@
 	        
 	        if (--remainingSeconds < 0) {
 	            clearInterval(interval);
-	            // Add logic here to handle timer expiration, e.g., submit exam automatically
+	            document.getElementById('endExamButton').click();
 	        }
 	    }, 1000);
 	});
