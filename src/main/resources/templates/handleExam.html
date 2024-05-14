@@ -146,26 +146,27 @@
 	console.log('Exam ID Outsidd:', examId);
 	
 	document.addEventListener('DOMContentLoaded', function() {
-	    $('#endExamButton').click(function() {
-	        var examId = getExamIdFromURL();
-	        console.log('Exam ID:', examId);
-	        $.ajax({
-	            url: '/end-exam/' + examId,
-	            method: 'POST',
-	            contentType: 'application/json',
-	            data: JSON.stringify({ examId: examId }),
-	            success: function(response) {
-	                console.log('AJAX success');
-	                alert('Exam ended successfully!');
-	            },
-	            error: function(xhr, status, error) {
-	                console.error(error);
-	                console.log('AJAX error');
-	                alert('Failed to end exam!');
-	            }
-	        });
-	    });
-	});
+    $('#endExamButton').click(function() {
+        var examId = getExamIdFromURL();
+        console.log('Exam ID:', examId);
+        $.ajax({
+            url: '/end-exam/' + examId,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ examId: examId }), 
+            success: function(response) {
+                console.log('AJAX success');
+                alert('Exam ended successfully!');
+            },
+            error: function(xhr, status, error) {
+                console.error(error);
+                console.log('AJAX error');
+                alert('Failed to end exam!');
+            }
+        });
+    });
+});
+
 
 	// Timer logic
 	document.addEventListener("DOMContentLoaded", function() {

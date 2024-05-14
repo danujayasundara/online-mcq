@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.AnswerDto;
 import com.example.demo.dto.AnswerDtoRes;
+import com.example.demo.dto.EndExamStatusDTO;
 import com.example.demo.dto.ExamAttemptDto;
 import com.example.demo.dto.ExamDto;
 import com.example.demo.dto.ExamDtoRes;
@@ -289,34 +290,36 @@ public class ExamController {
 		 
 	 //save exam attempt details
 	  @PostMapping("/saveAttemptData")
-	  public String saveData(@RequestBody String data) {
-	    
-		  ObjectMapper mapper = new ObjectMapper();
-		  mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		  ExamAttemptDto examAtt;
-			try {
-				examAtt = mapper.readValue(data, ExamAttemptDto.class);
-				System.out.println("Exam Att details");
-				System.out.println("ExamId: " + examAtt.getExamId());
-				System.out.println("UserId: " + examAtt.getUserId());
-				
-				ExamAttempt examAttempt = new ExamAttempt();
-				examAttempt.setExam(examAtt.getExamId());
-				User user = userRepository.findById(examAtt.getUserId().getId())
-                        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+	  public ResponseEntity<String> saveData(@RequestBody String data) {
+		    ObjectMapper mapper = new ObjectMapper();
+		    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		    ExamAttemptDto examAtt;
 
-				examAttempt.setUser(user);
-				examAttemptRepository.save(examAttempt);
-				
-			} catch (JsonMappingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (JsonProcessingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return "exampaper";
-	  }
+		    try {
+		        examAtt = mapper.readValue(data, ExamAttemptDto.class);
+		        System.out.println("Exam Att details");
+		        System.out.println("ExamId: " + examAtt.getExamId());
+		        System.out.println("UserId: " + examAtt.getUserId());
+
+		        ExamAttempt examAttempt = new ExamAttempt();
+		        examAttempt.setExam(examAtt.getExamId());
+		        User user = userRepository.findById(examAtt.getUserId().getId())
+		                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+		        examAttempt.setUser(user);
+		        examAttemptRepository.save(examAttempt);
+
+		        // Return a success response
+		        return ResponseEntity.ok("Exam attempt data saved successfully.");
+		    } catch (JsonMappingException e) {
+		        e.printStackTrace();
+		        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error mapping JSON.");
+		    } catch (JsonProcessingException e) {
+		        e.printStackTrace();
+		        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error processing JSON.");
+		    }
+		}
+
 	  
 	  //update attempt status
 	  @PostMapping("/completeAttempt")
@@ -391,29 +394,44 @@ public class ExamController {
 	  
 	  //end exam button
 	  @PostMapping("/end-exam/{examId}")
-	  public ResponseEntity<Void> endExam(@PathVariable Long examId, HttpServletRequest request) {
-	        HttpSession session = request.getSession();
-	        session.setAttribute("exam_" + examId + "_ended", true);
+	  public ResponseEntity<Void> endExam(@PathVariable Long examId, @RequestBody EndExamStatusDTO endExamStatusDTO) {
+		    examServiceImpl.markExamAsEnded(endExamStatusDTO.getExamId());
+		    System.out.println("Exam ID ended: " + examId);
+		    System.out.println("Exam ended successfully.");
 
-	        System.out.println("Exam ID ended: " + examId);
-	        System.out.println("Exam ended successfully.");
-
-	        return ResponseEntity.ok().build(); 
-	    }
+		    return ResponseEntity.ok().build(); 
+		}
 	  
 	  @GetMapping("/ended-exams")
-	  public ResponseEntity<List<Long>> getEndedExams(HttpSession session) {
-	      // Get the list of ended exam IDs from the session attributes
-	      List<Long> endedExamIds = new ArrayList<>();
-	      Enumeration<String> attributeNames = session.getAttributeNames();
-	      while (attributeNames.hasMoreElements()) {
-	          String attributeName = attributeNames.nextElement();
-	          if (attributeName.startsWith("exam_") && attributeName.endsWith("_ended")) {
-	              endedExamIds.add(Long.parseLong(attributeName.substring(5, attributeName.length() - 6)));
-	          }
+	  public ResponseEntity<List<EndExamStatusDTO>> getEndedExams() {
+		    List<Long> endedExamIds = examServiceImpl.getEndedExams(); 
+
+		    List<EndExamStatusDTO> endExamStatusDTOList = new ArrayList<>();
+		    for (Long examId : endedExamIds) {
+		        EndExamStatusDTO dto = new EndExamStatusDTO();
+		        dto.setExamId(examId);
+		        dto.setEnded(true); 
+		        endExamStatusDTOList.add(dto);
+		    }
+		    System.out.println("Ended exam list"+endExamStatusDTOList);
+
+		    return ResponseEntity.ok(endExamStatusDTOList);
+		}
+	  
+	  //get duration
+	  @GetMapping("/getduration/{examId}")
+	  public ResponseEntity<Map<String, Object>> getExamDuration(@PathVariable Long examId) {
+	      Integer duration = examServiceImpl.getExamDuration(examId);
+	      if (duration != null) {
+	          Map<String, Object> response = new HashMap<>();
+	          response.put("duration", duration);
+	          System.out.println("*********duration for front*******"+duration);
+	          return ResponseEntity.ok(response);
+	      } else {
+	          return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 	      }
-	      return ResponseEntity.ok(endedExamIds);
 	  }
+
 
 	  //update teacher table
 	  /*@GetMapping("/students/{examId}")

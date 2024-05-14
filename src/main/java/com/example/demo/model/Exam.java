@@ -32,6 +32,7 @@ public class Exam {
 	private LocalDateTime lastUpdate;
 	private int duration;
 	private boolean eStatus;
+	private boolean endExamStatus;
 	
 	@OneToMany(mappedBy = "exam", fetch = FetchType.EAGER)
 	@JsonIgnore
@@ -133,6 +134,14 @@ public class Exam {
 
 	public void setLastUpdate(LocalDateTime lastUpdate) {
 		this.lastUpdate = lastUpdate;
+	}
+	
+	public boolean isEndExamStatus() {
+		return endExamStatus;
+	}
+
+	public void setEndExamStatus(boolean endExamStatus) {
+		this.endExamStatus = endExamStatus;
 	}
 
 	@Override

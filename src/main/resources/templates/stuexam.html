@@ -119,64 +119,45 @@
 	    
 	    //end exam for students
 		document.addEventListener('DOMContentLoaded', function() {
-		    
-		    var storedEndedExamIds = JSON.parse(localStorage.getItem('endedExamIds'));
-		
-		    
-		    $.ajax({
-		        url: '/ended-exams', 
-		        method: 'GET',
-		        success: function(response) {
-		            console.log('Ended Exam IDs:', response);
-		            localStorage.setItem('endedExamIds', JSON.stringify(response)); 
-		            disableEndedExamLinks(response); 
-		        },
-		        error: function(xhr, status, error) {
-		            console.error('Error fetching ended exam IDs:', error);
-		        }
-		    });
-		
-		    console.log('storedEndedExamIds', storedEndedExamIds);
-		
-		    function disableEndedExamLinks(storedEndedExamIds) {
-		        var examLinks = document.querySelectorAll('.examLink');
-		        var examIds = []; 
-		
-		        examLinks.forEach(function(link) {
-		            var href = link.getAttribute('href');
-		            if (href) {
-		                var examId = href.split('/')[1]; 
-		                if (examId) { 
-		                    examIds.push(examId); 
-		                    console.log('Exam ID from link:', examId);
-		
-		                    
-		                    if (storedEndedExamIds.includes(parseInt(examId))) {
-		                        disableExamLink(link); 
-		                    }
-		                }
-		            }
-		        });
-		
-		        console.log('All Exam IDs:', examIds);
-		    }
-		
-		    function disableExamLink(link) {
-		        link.classList.add('disabled');
-		        link.setAttribute('disabled', true);
-		        link.style.color = 'gray';
-		        link.style.pointerEvents = 'none';
-		        link.setAttribute('title', 'This exam is no longer available');
-		        link.addEventListener('click', function(event) {
-		            event.preventDefault();
-		            alert('This exam is no longer available.');
-		        });
-		    }
-		
-		    function enableExamLink(link) {
-		        
-		    }
-		});
+	    $.ajax({
+	        url: '/ended-exams',
+	        method: 'GET',
+	        success: function(response) {
+	            console.log('Ended Exam IDs:', response);
+	            disableEndedExamLinks(response);
+	        },
+	        error: function(xhr, status, error) {
+	            console.error('Error fetching ended exam IDs:', error);
+	        }
+	    });
+	
+	    function disableEndedExamLinks(endedExams) {
+	        var examLinks = document.querySelectorAll('.examLink');
+	
+	        examLinks.forEach(function(link) {
+	            var href = link.getAttribute('href');
+	            if (href) {
+	                var examId = href.split('/')[1];
+	                if (examId && endedExams.some(function(exam) { return exam.examId === parseInt(examId) && exam.ended; })) {
+	                    disableExamLink(link);
+	                }
+	            }
+	        });
+	    }
+	
+	    function disableExamLink(link) {
+	        link.classList.add('disabled');
+	        link.setAttribute('disabled', true);
+	        link.style.color = 'gray';
+	        link.style.pointerEvents = 'none';
+	        link.setAttribute('title', 'This exam is no longer available');
+	        link.addEventListener('click', function(event) {
+	            event.preventDefault();
+	            alert('This exam is no longer available.');
+	        });
+	    }
+	});
+
 
     </script>
 </body>

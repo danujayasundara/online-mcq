@@ -402,6 +402,29 @@ public class ExamServiceImpl implements ExamService{
         return examRepository.findDurationByExamId(examId);
     }
 
+
+
+	public void markExamAsEnded(Long examId) {
+		Exam exam = examRepository.findByExamId(examId);
+		exam.setEndExamStatus(true);
+		examRepository.save(exam);
+		
+	}
+
+
+
+	public List<Long> getEndedExams() {
+		 List<Exam> endedExams = examRepository.findByisEndExamStatus();
+	        List<Long> endedExamIds = new ArrayList<>();
+
+	        for (Exam exam : endedExams) {
+	            endedExamIds.add(exam.getExam_id());
+	        }
+
+	        return endedExamIds;
+	    }
+	
+
 }
 
 	

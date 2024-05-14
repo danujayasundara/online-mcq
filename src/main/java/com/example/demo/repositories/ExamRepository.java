@@ -38,6 +38,9 @@ public interface ExamRepository extends JpaRepository<Exam, Long>{
 	@Query(value = "select question_id from question q JOIN exam e on q.exam_id = e.exam_id WHERE e.exam_id = :examId",
 			nativeQuery = true)
 	List<Long> findQuestionIdByExamId(Long examId);
+	
+	@Query("SELECT e FROM Exam e WHERE e.endExamStatus = true")
+	List<Exam> findByisEndExamStatus();
 
 	//List<Exam> findByExamNameContainingIgnoreCase(String exam_name);
 	
