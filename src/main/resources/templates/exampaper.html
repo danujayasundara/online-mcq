@@ -219,7 +219,7 @@
             	userId: userId
 	        };
 	
-		// Send data to backend using fetch API
+		// Send data to backend
 	        const exAtt = fetch('/saveAttemptData', {
 	            method: 'POST',
 	            headers: {
@@ -258,7 +258,7 @@
 
     $.ajax({
         type: 'GET',
-        url: '/getduration/' + examId, // Concatenate examId into the URL
+        url: '/getduration/' + examId, 
         success: function(response) {
             console.log('Response from server:', response);
 
