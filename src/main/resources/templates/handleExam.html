@@ -32,7 +32,9 @@
                                 <td>Exam Completed</td>
                             </tr>
                             <tr>
-                                <th>time</th>
+                                <th>Time Left</th>
+						        <th id="timer">00:00</th>
+						        <th>mins</th>
                             </tr>
                         </table>
                     </div>
@@ -78,7 +80,7 @@
                 <div class="endexam">
                     <table id="endexambtn" align="right">
                         <tr>
-                            <td><button id="endExamButton">End Exam</button></td>
+                            <td><button id="endExamButton" >End Exam</button></td>
                         </tr>
                     </table>
                 </div>
@@ -87,11 +89,12 @@
     </div>
     
   </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
 	
-	  setInterval(function() {
+	 /* setInterval(function() {
 	    location.reload();
-		}, 50000);
+		}, 50000); */
 	
 	document.addEventListener('DOMContentLoaded', function() {
 	    let storedTime = localStorage.getItem('currentTime');
@@ -132,12 +135,60 @@
 	    document.getElementById('endTime').textContent = formattedEndTime;
 	});
 	
+	//end exam
+	function getExamIdFromURL() {
+	    const urlPath = window.location.pathname;
+	    const pathParts = urlPath.split('/');
+	    const examId = pathParts[pathParts.length - 1];
+	    return examId;
+	}
+	var examId = getExamIdFromURL();
+	console.log('Exam ID Outsidd:', examId);
+	
 	document.addEventListener('DOMContentLoaded', function() {
-	    document.getElementById('endExamButton').addEventListener('click', function() {
-	        window.location.href = '/exams';
+	    $('#endExamButton').click(function() {
+	        var examId = getExamIdFromURL();
+	        console.log('Exam ID:', examId);
+	        $.ajax({
+	            url: '/end-exam/' + examId,
+	            method: 'POST',
+	            contentType: 'application/json',
+	            data: JSON.stringify({ examId: examId }),
+	            success: function(response) {
+	                console.log('AJAX success');
+	                alert('Exam ended successfully!');
+	            },
+	            error: function(xhr, status, error) {
+	                console.error(error);
+	                console.log('AJAX error');
+	                alert('Failed to end exam!');
+	            }
+	        });
 	    });
 	});
+
+	// Timer logic
+	document.addEventListener("DOMContentLoaded", function() {
+	    const timerElement = document.getElementById('timer');
+	    const durationElement = document.getElementById('duration');
+	    let duration = parseInt(durationElement.textContent.trim()); // Convert to number
 	
+	    let remainingSeconds = duration * 60; // Convert minutes to seconds
+	
+	    const interval = setInterval(function() {
+	        const hours = Math.floor(remainingSeconds / 3600);
+	        const minutes = Math.floor((remainingSeconds % 3600) / 60);
+	        const seconds = remainingSeconds % 60;
+	
+	        timerElement.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+	        
+	        if (--remainingSeconds < 0) {
+	            clearInterval(interval);
+	            // Add logic here to handle timer expiration, e.g., submit exam automatically
+	        }
+	    }, 1000);
+	});
+
 
   </script>
 

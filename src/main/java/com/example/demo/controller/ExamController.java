@@ -3,9 +3,13 @@ package com.example.demo.controller;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.tomcat.util.json.JSONParser;
@@ -13,6 +17,7 @@ import org.hibernate.annotations.Any;
 import org.hibernate.boot.archive.scan.spi.ClassDescriptor.Categorization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -62,10 +67,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 //@RequestMapping("/exampage")
 //@CrossOrigin("*")
-
+@CrossOrigin(origins = "http://localhost:8080")
 public class ExamController {
 
 	@Autowired
@@ -381,8 +389,32 @@ public class ExamController {
 	        	return ResponseEntity.notFound().build();	        }
 	    }
 	  
+	  //end exam button
+	  @PostMapping("/end-exam/{examId}")
+	  public ResponseEntity<Void> endExam(@PathVariable Long examId, HttpServletRequest request) {
+	        HttpSession session = request.getSession();
+	        session.setAttribute("exam_" + examId + "_ended", true);
+
+	        System.out.println("Exam ID ended: " + examId);
+	        System.out.println("Exam ended successfully.");
+
+	        return ResponseEntity.ok().build(); 
+	    }
 	  
-	  
+	  @GetMapping("/ended-exams")
+	  public ResponseEntity<List<Long>> getEndedExams(HttpSession session) {
+	      // Get the list of ended exam IDs from the session attributes
+	      List<Long> endedExamIds = new ArrayList<>();
+	      Enumeration<String> attributeNames = session.getAttributeNames();
+	      while (attributeNames.hasMoreElements()) {
+	          String attributeName = attributeNames.nextElement();
+	          if (attributeName.startsWith("exam_") && attributeName.endsWith("_ended")) {
+	              endedExamIds.add(Long.parseLong(attributeName.substring(5, attributeName.length() - 6)));
+	          }
+	      }
+	      return ResponseEntity.ok(endedExamIds);
+	  }
+
 	  //update teacher table
 	  /*@GetMapping("/students/{examId}")
 	  public String getStudentsByExamId(@PathVariable Exam examId, Model model) {
