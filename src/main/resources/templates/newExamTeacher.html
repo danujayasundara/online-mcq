@@ -158,7 +158,7 @@
             </div>
             <form id = "examForm" th:action="@{/saveExam}" th:object="${exam}" method="post" class="form-inline">
             
-            <input type="text" id="inputExam" name= "inputExam" placeholder="Exam Name" th:value="''" th:field="*{exam_name}">
+            <input type="text" id="inputExam" name= "inputExam" placeholder="Exam Name" th:value="''" th:field="*{exam_name}"> <!-- -->
               <div class="form-group mr-2">
                   <label for="examDateTime" class="mr-2">Exam Date Time:</label>
                   <input type="datetime-local" th:field="*{dateTime}" id="examDateTime" name="examDateTime"
@@ -286,24 +286,8 @@
         /* addQuestionBtn.addEventListener('click', () => {
             questionForm.style.display = 'block';
         }); */
-
-	    $(document).ready(function () { 
-			let questionIdOld = null;
-			$('.questionLink').on('click', function(event) {
-		        event.preventDefault(); 
-		        questionIdOld = $(this).data('questionid');
-		
-		        $('#quesId').val(questionIdOld);
-		
-		        console.log('Question ID:', questionIdOld);
-		    });
-	
-			/*const storedExamId = localStorage.getItem('examId');
-			console.log('Stored **** Exam ID:', storedExamId);
-		
-			const storedExamdate= localStorage.getItem('examDateTime');
-			console.log('Stored **** Exam date:', storedExamdate);*/
-			
+        
+         $(document).ready(function () { 
 			let isPublished = false;
 	    	//let examId = localStorage.getItem('selectedExamId');
 	    	// let examId = parseInt(localStorage.getItem('selectedExamId'));
@@ -333,6 +317,25 @@
 				
 			}
 			document.getElementById('publish').onclick=publishExam;
+		});
+
+	    $(document).ready(function () { 
+			let questionIdOld = null;
+			$('.questionLink').on('click', function(event) {
+		        event.preventDefault(); 
+		        questionIdOld = $(this).data('questionid');
+		
+		        $('#quesId').val(questionIdOld);
+		
+		        console.log('Question ID:', questionIdOld);
+		    });
+	
+			/*const storedExamId = localStorage.getItem('examId');
+			console.log('Stored **** Exam ID:', storedExamId);
+		
+			const storedExamdate= localStorage.getItem('examDateTime');
+			console.log('Stored **** Exam date:', storedExamdate);*/
+			
 			
 		function saveQuestion() {
 		    const questionInput = document.getElementById('question_content').value;

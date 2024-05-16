@@ -57,25 +57,18 @@
             </div>
             <div class="attright">
                 <div class="attstudent">
-                    <table id="attemptedStudentsTable">
-                        <tr>
-                            <td>Attending Student List</td>
-                        </tr>
-                        <tr>
-                            <td>Student 1</td>
-                            <td>status</td>
-                        </tr>
-                        <tbody>
-				            <!--<tr th:each="fullName : ${fullNames}">
-					            <td th:text="${fullName}"></td>
-					            
-					        </tr>-->
-					        <!--<tr th:each="info : ${attemptInfos}">
-					            <td th:text="${info.name}"></td>
-					            <td th:text="${info.status ? 'Completed' : ''}"></td>
-					        </tr>-->
-			        	</tbody>
-                    </table>
+                    <table id="attendingstulist">
+					    <thead>
+					        <tr>
+					            <th>Full Name</th>
+					            <th>Status</th>
+					        </tr>
+					    </thead>
+					    <tbody>
+					        
+					    </tbody>
+					</table>
+
                 </div>
                 <div class="endexam">
                     <table id="endexambtn" align="right">
@@ -190,29 +183,49 @@
 	    }, 1000);
 	});
 	
-	//get attempting student list
+	//attempting students
 	document.addEventListener('DOMContentLoaded', function() {
-	    const tableBody = document.getElementById('attemptedStudentsTable').getElementsByTagName('tbody')[0];
-	
-	    function fetchAttemptedStudents(examId) {
-	        fetch('/exam/${examId}/students')
-	            .then(response => response.json())
-	            .then(data => {
-	                data.forEach(student => {
-	                    const row = tableBody.insertRow();
-	                    row.insertCell(0).textContent = student.fullName;
-	                    row.insertCell(1).textContent = student.attemptStatus ? 'Completed' : '';
-	                });
-	            })
-	            .catch(error => {
-	                console.error('Error fetching attempted students:', error);
-	            });
-	    }
-	
-	    // Call fetchAttemptedStudents with the exam ID
-	    const examId =getExamIdFromURL();
-	    fetchAttemptedStudents(examId);
-	});
+    const examId = getExamIdFromURL();
+    fetchAndDisplayStudents(examId); // Initially display all attending students
+
+    // Function to fetch and display all attending students
+    function fetchAndDisplayStudents(examId) {
+        const tableBody = document.querySelector('#attendingstulist tbody');
+        fetch(`/exam/${examId}/students`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Students Data:', data); // Check the data in the console
+                tableBody.innerHTML = ''; // Clear existing rows
+                data.forEach(student => {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = student.fullname;
+                    const statusCell = row.insertCell(1);
+                    statusCell.textContent = student.status ? 'Completed' : 'Attending';
+                    statusCell.style.color = student.status ? 'green' : 'blue'; // Adjust colors as needed
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching students:', error);
+            });
+    }
+
+    // Update the student list periodically
+    setInterval(function() {
+        fetchAndDisplayStudents(examId);
+    }, 30000); // Adjust the interval as needed (in milliseconds)
+
+    // Function to get the exam ID from the URL
+    function getExamIdFromURL() {
+        const urlPath = window.location.pathname;
+        const pathParts = urlPath.split('/');
+        return pathParts[pathParts.length - 1];
+    }
+});
 
 
   </script>

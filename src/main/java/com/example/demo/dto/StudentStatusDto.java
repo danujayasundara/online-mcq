@@ -29,4 +29,12 @@ public class StudentStatusDto {
 	public void setStatus(boolean status) {
 		this.status = status;
 	}
+	
+	@Override
+    public String toString() {
+        return "StudentStatusDto{" +
+                "fullname=" + fullname +
+                ", status=" + status +
+                '}';
+    }
 }

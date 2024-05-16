@@ -457,7 +457,11 @@ public class ExamController {
 	  @GetMapping("/exam/{examId}/students")
 	    public ResponseEntity<List<StudentStatusDto>> getAttemptedStudents(@PathVariable Long examId) {
 		  Exam exam = examServiceImpl.getExamById(examId); 
+		  System.out.println("Attempted Students List:");
 	      List<StudentStatusDto> attemptedStudents = examServiceImpl.getAttemptedStudentsForExam(exam);
+	      for (StudentStatusDto student : attemptedStudents) {
+	          System.out.println(student); // Assuming StudentStatusDto has a meaningful toString() method
+	      }
 	      return ResponseEntity.ok(attemptedStudents);
 	   }
 	  

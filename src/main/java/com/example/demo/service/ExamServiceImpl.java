@@ -434,9 +434,8 @@ public class ExamServiceImpl implements ExamService{
             return new ExamAttendedDto(exam.getExam_id(), attended);
         }).collect(Collectors.toList());
     }
-
-
-
+	
+	//attempting students
 	public List<StudentStatusDto> getAttemptedStudentsForExam(Exam examId) {
 		List<ExamAttempt> examAttempts = examAttemptRepository.findByExam(examId);
         List<StudentStatusDto> attemptedStudents = new ArrayList<>();
@@ -446,9 +445,11 @@ public class ExamServiceImpl implements ExamService{
             studentDto.setStatus(attempt.getAttempt_status());
             attemptedStudents.add(studentDto);
         }
+        System.out.println("*****//////****........");
+        System.out.println("Attending students"+attemptedStudents);
         return attemptedStudents;
 	}
-	
+
 
 }
 
