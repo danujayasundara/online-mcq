@@ -18,8 +18,12 @@ public interface ExamAttemptRepository extends JpaRepository<ExamAttempt, Long>{
 	@Query("SELECT ea FROM ExamAttempt ea WHERE ea.user = :user AND ea.exam = :exam")
     ExamAttempt findByUserAndExam(@Param("user") User user, @Param("exam") Exam exam);
 
-
+	
+	@Query("SELECT COUNT(ea) > 0 FROM ExamAttempt ea WHERE ea.user = :user AND ea.exam = :exam")
+    boolean existsByUserAndExam(@Param("user") User user, @Param("exam") Exam exam);
+	
 	List<ExamAttempt> findByExam(Exam examId);
+	List<ExamAttempt> findByUser(User user);
 	
 	/*@Query(value = "SELECT * FROM ExamAttempt WHERE attempt_status = 1 AND exam_id = :examId", 
 		     nativeQuery = true)

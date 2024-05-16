@@ -19,11 +19,13 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dto.AnswerDto;
 import com.example.demo.dto.AnswerDtoRes;
 import com.example.demo.dto.ExamAttemptDto;
+import com.example.demo.dto.ExamAttendedDto;
 import com.example.demo.dto.ExamDto;
 import com.example.demo.dto.ExamDtoRes;
 
 import com.example.demo.dto.QuesDto;
 import com.example.demo.dto.QuesDtoRes;
+import com.example.demo.dto.StudentStatusDto;
 import com.example.demo.model.Answer;
 import com.example.demo.model.Exam;
 import com.example.demo.model.ExamAttempt;
@@ -422,7 +424,30 @@ public class ExamServiceImpl implements ExamService{
 	        }
 
 	        return endedExamIds;
-	    }
+	}
+	
+	//attended status
+	public List<ExamAttendedDto> getExamStatuses(User user) {
+        List<Exam> exams = examRepository.findAll();
+        return exams.stream().map(exam -> {
+            boolean attended = examAttemptRepository.existsByUserAndExam(user, exam);
+            return new ExamAttendedDto(exam.getExam_id(), attended);
+        }).collect(Collectors.toList());
+    }
+
+
+
+	public List<StudentStatusDto> getAttemptedStudentsForExam(Exam examId) {
+		List<ExamAttempt> examAttempts = examAttemptRepository.findByExam(examId);
+        List<StudentStatusDto> attemptedStudents = new ArrayList<>();
+        for (ExamAttempt attempt : examAttempts) {
+        	StudentStatusDto studentDto = new StudentStatusDto();
+            studentDto.setFullname(attempt.getUser().getFullname());
+            studentDto.setStatus(attempt.getAttempt_status());
+            attemptedStudents.add(studentDto);
+        }
+        return attemptedStudents;
+	}
 	
 
 }

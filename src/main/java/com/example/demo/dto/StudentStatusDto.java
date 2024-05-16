@@ -2,20 +2,27 @@ package com.example.demo.dto;
 
 public class StudentStatusDto {
 	
-	private String name;
+	private String fullname;
     private boolean status;
     
-	public StudentStatusDto(String name, boolean status) {
+	public StudentStatusDto(String fullname, boolean status) {
 		super();
-		this.name = name;
+		this.fullname = fullname;
 		this.status = status;
 	}
-	public String getName() {
-		return name;
+	
+	public StudentStatusDto() {
+		// TODO Auto-generated constructor stub
 	}
-	public void setName(String name) {
-		this.name = name;
+
+	public String getFullname() {
+		return fullname;
 	}
+
+	public void setFullname(String fullname) {
+		this.fullname = fullname;
+	}
+
 	public boolean getStatus() {
 		return status;
 	}

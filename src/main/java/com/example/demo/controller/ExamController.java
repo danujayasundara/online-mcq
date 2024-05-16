@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ import com.example.demo.dto.AnswerDto;
 import com.example.demo.dto.AnswerDtoRes;
 import com.example.demo.dto.EndExamStatusDTO;
 import com.example.demo.dto.ExamAttemptDto;
+import com.example.demo.dto.ExamAttendedDto;
 import com.example.demo.dto.ExamDto;
 import com.example.demo.dto.ExamDtoRes;
 
@@ -255,6 +257,7 @@ public class ExamController {
 	      Long userId = getUserIdByEmail(loggedInUsername);
 	      
 	      User user = userServiceImpl.getUserById(userId);
+	      List<ExamAttempt> userAttempts = examAttemptRepository.findByUser(user);
 	      for (Exam exam : activeExams) {
 	          Long examId = exam.getExam_id();
 	          System.out.println("Exam Id" +examId);
@@ -267,6 +270,23 @@ public class ExamController {
 	         // boolean att = examAttempt.getAttempt_status();
 	          //System.out.println("Exam Attemot Status" +att); 
 	      }
+	      List<ExamAttendedDto> examAttendedDtos = new ArrayList<>();
+
+	        // Create a map to store attempt status for each exam
+	        Map<Long, Boolean> attemptStatusMap = new HashMap<>();
+	        for (ExamAttempt attempt : userAttempts) {
+	            attemptStatusMap.put(attempt.getExam().getExam_id(), attempt.getAttempt_status());
+	        }
+
+	        // Iterate through active exams and add attempt status to the DTO list
+	        for (Exam exam : activeExams) {
+	            Long examId = exam.getExam_id();
+	            boolean attended = attemptStatusMap.getOrDefault(examId, false); // Default to false if not found
+	            ExamAttendedDto dto = new ExamAttendedDto(examId, attended);
+	            examAttendedDtos.add(dto);
+	        }
+
+	        model.addAttribute("examAttemptDtos", examAttendedDtos);
 	      
 		  //model.addAttribute("exams", exams); 
 		  model.addAttribute("loggedInUserId", userId); 
@@ -425,13 +445,47 @@ public class ExamController {
 	      if (duration != null) {
 	          Map<String, Object> response = new HashMap<>();
 	          response.put("duration", duration);
-	          System.out.println("*********duration for front*******"+duration);
+	          System.out.println("*********duration for front*******" + duration);
 	          return ResponseEntity.ok(response);
 	      } else {
 	          return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 	      }
 	  }
+	  
+	  
+	  //get all attempting students
+	  @GetMapping("/exam/{examId}/students")
+	    public ResponseEntity<List<StudentStatusDto>> getAttemptedStudents(@PathVariable Long examId) {
+		  Exam exam = examServiceImpl.getExamById(examId); 
+	      List<StudentStatusDto> attemptedStudents = examServiceImpl.getAttemptedStudentsForExam(exam);
+	      return ResponseEntity.ok(attemptedStudents);
+	   }
+	  
+	  //send attended status
+	 /* @GetMapping("/exam-statuses")
+	  public ResponseEntity<List<ExamAttendedDto>> getExamStatuses(Principal principal) {
+	      try {
+	          String username = principal.getName();
+	          User user = userRepository.findByEmail(username);
+	          List<ExamAttempt> userAttempts = examAttemptRepository.findByUser(user);
 
+	          List<ExamAttendedDto> examAttendedDtos = new ArrayList<>();
+	          for (ExamAttempt attempt : userAttempts) {
+	              boolean attended = attempt.getAttempt_status(); // Check the attempt status
+	              Exam exam = attempt.getExam();
+
+	              ExamAttendedDto dto = new ExamAttendedDto(exam.getExam_id(), attempt.getAttempt_status());
+	              examAttendedDtos.add(dto);
+	          }
+
+	          System.out.println("***********************************\n******************\n");
+	          System.out.println("EXAM ATTEMPT" + examAttendedDtos);
+
+	          return ResponseEntity.ok(examAttendedDtos);
+	      } catch (Exception e) {
+	          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	      }
+	  }*/
 
 	  //update teacher table
 	  /*@GetMapping("/students/{examId}")

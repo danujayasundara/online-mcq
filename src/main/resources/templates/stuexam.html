@@ -45,7 +45,7 @@
 	                        <th>Status</th>
 	                    </tr>
 	                </thead>
-                    <tbody>
+                    <tbody id="examBody">
 			            <tr th:each="exam : ${exams}" class="searchable" onclick="myFunction(this)" data-examid="${exam.exam_id}" data-userid="${loggedInUserId}"
 			            id="examList">
 			                <td><a th:href="@{'/' + ${exam.exam_id} + '/questions'(examId=${exam.exam_id}, userId=${loggedInUserId})}" 
@@ -53,8 +53,11 @@
 			                data-exam-id="${exam.exam_id}"></a></td>
 			                <td th:text="${exam.dateTime}"></td>
 			                <td th:text="${exam.duration}"></td>
-			                <td th:text="${exam.e_status == 1 ? 'Attended' : 'Pending'}" id="statusDisplay"></td>
-			                <!--<td th:text="${examAttempt?.attemptstatus == 1 ? 'Attended' : 'Pending'}" id="statusDisplay"></td>-->
+			                <td>
+				                <span th:each="attempt : ${examAttemptDtos}" th:if="${attempt.examId == exam.exam_id}">
+				                    <span th:text="${attempt.attended ? 'Attended' : 'Pending'}"></span>
+				                </span>
+				            </td>
 			            </tr>
         			</tbody>
                 </table>
@@ -157,7 +160,27 @@
 	        });
 	    }
 	});
+	
+	// attend status
+	function updateAttemptStatuses() {
+    fetch('/exam-statuses')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Fetched Attempt Statuses:', data); // Debugging log
+            data.forEach(status => {
+                const examId = status.examId;
+                const statusDisplay = document.getElementById(`statusDisplay_${examId}`);
+                if (statusDisplay) {
+                    statusDisplay.textContent = status.attended ? 'Attended' : 'Pending';
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching attempt statuses:', error);
+        });
+}
 
+updateAttemptStatuses(); // Call the function when the page loads
 
     </script>
 </body>
