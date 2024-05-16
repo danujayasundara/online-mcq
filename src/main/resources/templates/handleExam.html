@@ -185,47 +185,44 @@
 	
 	//attempting students
 	document.addEventListener('DOMContentLoaded', function() {
-    const examId = getExamIdFromURL();
-    fetchAndDisplayStudents(examId); // Initially display all attending students
+	    const examId = getExamIdFromURL();
+	    fetchAndDisplayStudents(examId); 
+	    
+	    function fetchAndDisplayStudents(examId) {
+	        const tableBody = document.querySelector('#attendingstulist tbody');
+	        fetch(`/exam/${examId}/students`)
+	            .then(response => {
+	                if (!response.ok) {
+	                    throw new Error('Network response was not ok');
+	                }
+	                return response.json();
+	            })
+	            .then(data => {
+	                console.log('Students Data:', data); 
+	                tableBody.innerHTML = ''; // clear existing rows
+	                data.forEach(student => {
+	                    const row = tableBody.insertRow();
+	                    row.insertCell(0).textContent = student.fullname;
+	                    const statusCell = row.insertCell(1);
+	                    statusCell.textContent = student.status ? 'Completed' : 'Attending';
+	                    statusCell.style.color = student.status ? 'green' : 'blue'; 
+	                });
+	            })
+	            .catch(error => {
+	                console.error('Error fetching students:', error);
+	            });
+	    }
+	
+	    setInterval(function() {
+	        fetchAndDisplayStudents(examId);
+	    }, 5000); 
 
-    // Function to fetch and display all attending students
-    function fetchAndDisplayStudents(examId) {
-        const tableBody = document.querySelector('#attendingstulist tbody');
-        fetch(`/exam/${examId}/students`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Students Data:', data); // Check the data in the console
-                tableBody.innerHTML = ''; // Clear existing rows
-                data.forEach(student => {
-                    const row = tableBody.insertRow();
-                    row.insertCell(0).textContent = student.fullname;
-                    const statusCell = row.insertCell(1);
-                    statusCell.textContent = student.status ? 'Completed' : 'Attending';
-                    statusCell.style.color = student.status ? 'green' : 'blue'; // Adjust colors as needed
-                });
-            })
-            .catch(error => {
-                console.error('Error fetching students:', error);
-            });
-    }
-
-    // Update the student list periodically
-    setInterval(function() {
-        fetchAndDisplayStudents(examId);
-    }, 30000); // Adjust the interval as needed (in milliseconds)
-
-    // Function to get the exam ID from the URL
-    function getExamIdFromURL() {
-        const urlPath = window.location.pathname;
-        const pathParts = urlPath.split('/');
-        return pathParts[pathParts.length - 1];
-    }
-});
+	    function getExamIdFromURL() {
+	        const urlPath = window.location.pathname;
+	        const pathParts = urlPath.split('/');
+	        return pathParts[pathParts.length - 1];
+	    }
+	});
 
 
   </script>
