@@ -24,7 +24,7 @@
         </div>
         <div class="sturesultmain">
             <div class="stuexamresult">
-                <!--<h3 th:text="${examName}"></h3>-->
+                <h3 id="examNameMain"></h3>
         
                 <div class="stufinalresult">
                   <table id="stugrade">
@@ -65,9 +65,40 @@
     </div>
     
  <script>
+ 	
+ 	function getExamIdFromURL() {
+	        const urlPath = window.location.pathname;
+	        const pathParts = urlPath.split('/');
+	        return pathParts[pathParts.length - 1];
+	    }
+	    
+	function fetchAndDisplayExamName() {
+	    const examId = getExamIdFromURL();
+	    fetch('/exam/' + examId)
+	        .then(response => {
+	            if (!response.ok) {
+	                throw new Error('Network response was not ok');
+	            }
+	            return response.json();
+	        })
+	        .then(data => {
+	            console.log('Exam Details:', data); 
+	            const examNameElement = document.getElementById('examNameMain');
+	            if (examNameElement) {
+	                examNameElement.textContent = data.examName;
+	            }
+	        })
+	        .catch(error => {
+	            console.error('Error fetching exam details:', error);
+	        });
+	}
+	
+	document.addEventListener('DOMContentLoaded', fetchAndDisplayExamName);
+
     function goToStuExamPage() {
         window.location.href = "/stuexam"; 
     }
+    
 </script>
 
     <footer>

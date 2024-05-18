@@ -103,22 +103,22 @@
 	    
 	    
 	    // develop search bar
-	     $(document).ready(function() {
-	        $('#searchForm').submit(function(e) {
-	            e.preventDefault(); 
-	
-	            var searchText = $('#searchInput').val().toLowerCase().trim();
-	            $('.searchable').each(function() {
-	                var examName = $(this).find('td:first-child').text().toLowerCase(); 
-	                if (examName.includes(searchText)) {
-	                    $(this).addClass('highlight'); 
-	                } else {
-						alert('No matching exam found.');
-	                    $(this).removeClass('highlight');
-	                }
-	            });
-	        });
-	    });
+	    $(document).ready(function() {
+			 $('#searchForm').submit(function(e) {
+			    e.preventDefault();
+				var searchText = $('#searchInput').val().toLowerCase().trim(); 
+				var matchingExams = $('.searchable').filter(function() {
+			    var examName = $(this).find('td:first-child').text().toLowerCase(); 
+			    return examName.includes(searchText);
+			  });
+			if (matchingExams.length > 0) {
+			   matchingExams.addClass('highlight');
+			   } else {
+			      alert('No matching exam found.');
+			      $('.searchable').removeClass('highlight');
+			    }
+			});
+		});
 	    
 	    //end exam for students
 		document.addEventListener('DOMContentLoaded', function() {
@@ -163,24 +163,24 @@
 	
 	// attend status
 	function updateAttemptStatuses() {
-    fetch('/exam-statuses')
-        .then(response => response.json())
-        .then(data => {
-            console.log('Fetched Attempt Statuses:', data); // Debugging log
-            data.forEach(status => {
-                const examId = status.examId;
-                const statusDisplay = document.getElementById(`statusDisplay_${examId}`);
-                if (statusDisplay) {
-                    statusDisplay.textContent = status.attended ? 'Attended' : 'Pending';
-                }
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching attempt statuses:', error);
-        });
-}
-
-updateAttemptStatuses(); // Call the function when the page loads
+	    fetch('/exam-statuses')
+	        .then(response => response.json())
+	        .then(data => {
+	            console.log('Fetched Attempt Statuses:', data); 
+	            data.forEach(status => {
+	                const examId = status.examId;
+	                const statusDisplay = document.getElementById(`statusDisplay_${examId}`);
+	                if (statusDisplay) {
+	                    statusDisplay.textContent = status.attended ? 'Attended' : 'Pending';
+	                }
+	            });
+	        })
+	        .catch(error => {
+	            console.error('Error fetching attempt statuses:', error);
+	        });
+	}
+	
+	updateAttemptStatuses(); 
 
     </script>
 </body>

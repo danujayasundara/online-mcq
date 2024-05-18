@@ -460,11 +460,13 @@ public class ExamController {
 		  System.out.println("Attempted Students List:");
 	      List<StudentStatusDto> attemptedStudents = examServiceImpl.getAttemptedStudentsForExam(exam);
 	      for (StudentStatusDto student : attemptedStudents) {
-	          System.out.println(student); // Assuming StudentStatusDto has a meaningful toString() method
+	          System.out.println(student); 
 	      }
 	      return ResponseEntity.ok(attemptedStudents);
 	   }
 	  
+	  
+
 	  //send attended status
 	 /* @GetMapping("/exam-statuses")
 	  public ResponseEntity<List<ExamAttendedDto>> getExamStatuses(Principal principal) {

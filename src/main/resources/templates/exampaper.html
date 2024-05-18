@@ -24,7 +24,7 @@
         </div>
         <div class="stusingleexam">
         	<div class="stuexam">
-        		<h3>Exam name</h3>
+        		<h3 id ="examNameMain"></h3>
         		<!--<h1 th:text="'Exam: ' + ${examName}"></h1>-->
               	 <h4>Time Left: <span id="timer">00:00:00</span> mins</h4>
               	 <div id="duration" th:text="${duration}" style="display: none;"></div>
@@ -171,7 +171,7 @@
 	                throw new Error('Error updating attempt status');
 	            }
 	            console.log('Attempt status updated successfully');
-	        	window.location.href = '/result';
+	        	window.location.href = '/result/' + examId;
 	        }).catch(error => {
             	console.error('Error updating attempt status:', error);
         	});
@@ -242,74 +242,98 @@
 	    } else {
 	        console.log('No data found in local storage');
 	    }
+	    fetchAndDisplayExamName();
 	}); 
 	
 	
     
         // Timer logic
       document.addEventListener('DOMContentLoaded', function() {
-    const timerElement = document.getElementById('timer');
+	    const timerElement = document.getElementById('timer');
+	
+	    function initializeTimer(duration) {
+	        let remainingSeconds = parseInt(localStorage.getItem('remainingSeconds'));
+	        if (!remainingSeconds) {
+	            remainingSeconds = parseInt(duration) * 60;
+	        }
+	
+	        const interval = setInterval(function() {
+	            remainingSeconds--;
+	            if (remainingSeconds < 0) {
+	                clearInterval(interval);
+	                displaySavedAnswers();
+	            } else {
+	                const hours = Math.floor(remainingSeconds / 3600);
+	                const minutes = Math.floor((remainingSeconds % 3600) / 60);
+	                const seconds = remainingSeconds % 60;
+	                timerElement.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+	                localStorage.setItem('remainingSeconds', remainingSeconds);
+	            }
+	        }, 1000);
+	    }
+	
+	    if (!localStorage.getItem('timerInitialized')) {
+	        fetch('/getduration/' + examId)
+	            .then(response => response.json())
+	            .then(data => {
+	                const duration = data.duration;
+	                console.log('Duration fetched from response:', duration);
+	                localStorage.setItem('duration', duration);
+	                initializeTimer(duration);
+	                localStorage.setItem('timerInitialized', 'true');
+	            })
+	            .catch(error => {
+	                console.error('Error fetching duration:', error);
+	            });
+	    } else {
+	        const duration = localStorage.getItem('duration');
+	        initializeTimer(duration);
+	    }
+	
+	    window.goToPreviousQuestion = function() {
+	        const currentIndex = parseInt(getParameterByName('currentQuestionIndex'));
+	        const previousIndex = currentIndex - 1;
+	        if (previousIndex >= 0) {
+	            localStorage.setItem('currentQuestionIndex', previousIndex);
+	            window.location.href = `/examPage?examId=${examId}&currentQuestionIndex=${previousIndex}`;
+	        }
+	        return false;
+	    };
+	
+	    window.goToNextQuestion = function() {
+	        const currentIndex = parseInt(getParameterByName('currentQuestionIndex'));
+	        const nextIndex = currentIndex + 1;
+	        if (nextIndex < totalQuestions) {
+	            localStorage.setItem('currentQuestionIndex', nextIndex);
+	            window.location.href = `/examPage?examId=${examId}&currentQuestionIndex=${nextIndex}`;
+	        }
+	        return false;
+	    };
+	});
 
-    function initializeTimer(duration) {
-        let remainingSeconds = parseInt(localStorage.getItem('remainingSeconds'));
-        if (!remainingSeconds) {
-            remainingSeconds = parseInt(duration) * 60;
-        }
-
-        const interval = setInterval(function() {
-            remainingSeconds--;
-            if (remainingSeconds < 0) {
-                clearInterval(interval);
-                displaySavedAnswers();
+	// display exam name
+	function fetchAndDisplayExamName() {
+            const examId = getParameterByName('examId');
+            const storedExamName = localStorage.getItem('examName');
+             console.log('Exam name stored in localStorage***:', storedExamName);
+            if (storedExamName) {
+                document.getElementById('examNameMain').textContent = storedExamName;
             } else {
-                const hours = Math.floor(remainingSeconds / 3600);
-                const minutes = Math.floor((remainingSeconds % 3600) / 60);
-                const seconds = remainingSeconds % 60;
-                timerElement.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-                localStorage.setItem('remainingSeconds', remainingSeconds);
+                fetch('/exam/' + examId)
+                    .then(response => response.json())
+                    .then(data => {
+                        const examNameElement = document.getElementById('examNameMain');
+                        examNameElement.textContent = data.examName;
+                        localStorage.setItem('examName', data.examName);
+                       
+                    })
+                    .catch(error => {
+                        console.error('Error fetching exam details:', error);
+                    });
             }
-        }, 1000);
-    }
-
-    if (!localStorage.getItem('timerInitialized')) {
-        fetch('/getduration/' + examId)
-            .then(response => response.json())
-            .then(data => {
-                const duration = data.duration;
-                console.log('Duration fetched from response:', duration);
-                localStorage.setItem('duration', duration);
-                initializeTimer(duration);
-                localStorage.setItem('timerInitialized', 'true');
-            })
-            .catch(error => {
-                console.error('Error fetching duration:', error);
-            });
-    } else {
-        const duration = localStorage.getItem('duration');
-        initializeTimer(duration);
-    }
-
-    window.goToPreviousQuestion = function() {
-        const currentIndex = parseInt(getParameterByName('currentQuestionIndex'));
-        const previousIndex = currentIndex - 1;
-        if (previousIndex >= 0) {
-            localStorage.setItem('currentQuestionIndex', previousIndex);
-            window.location.href = `/examPage?examId=${examId}&currentQuestionIndex=${previousIndex}`;
         }
-        return false;
-    };
 
-    window.goToNextQuestion = function() {
-        const currentIndex = parseInt(getParameterByName('currentQuestionIndex'));
-        const nextIndex = currentIndex + 1;
-        if (nextIndex < totalQuestions) {
-            localStorage.setItem('currentQuestionIndex', nextIndex);
-            window.location.href = `/examPage?examId=${examId}&currentQuestionIndex=${nextIndex}`;
-        }
-        return false;
-    };
-});
-
+	
  </script>       
 </body>
 </html>

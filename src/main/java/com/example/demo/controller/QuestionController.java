@@ -184,8 +184,8 @@ public class QuestionController {
 	  }
 	  
 	//display result page
-	  @GetMapping("/result")
-	  public String displayResult(Model model, HttpSession session) {
+	  @GetMapping("/result/{examId}")
+	  public String displayResult(@PathVariable("examId") Long examId,Model model, HttpSession session) {
 		  Double result = (Double) session.getAttribute("result");
 		    if (result != null) {
 		        model.addAttribute("result", result);
