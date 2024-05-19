@@ -175,6 +175,8 @@ public class ExamController {
 				DateTimeFormatter customFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 				String customFormattedDate = savedExam.getDateTime().format(customFormatter);
 				examdtoRes.setDateTime(customFormattedDate);
+				
+		        
 			/*
 				List<QuesDtoRes> questionDtoResList = new ArrayList<>();
 				for (Question question : savedExam.getQuestions()) {
@@ -199,6 +201,11 @@ public class ExamController {
 				}
 
 				examdtoRes.setQuestion(questionDtoResList);
+				
+				RequestDto response = new RequestDto();
+		        response.setDirectionPath("/addnewExam");
+		        response.setExamDtoRes(examdtoRes);
+				return response;
 				*/
 				//System.out.print(savedExam.getQuestions());
 				//System.out.print(savedExam.getQuestions().get(0).getQuestion_id());
@@ -216,6 +223,7 @@ public class ExamController {
 		  	//System.out.println("Ab");
 		
 		  	return "redirect:/newExamTeacher";
+		  	//return null;
 	    }
 	  
 	  //update existing exam
