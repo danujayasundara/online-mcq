@@ -327,8 +327,9 @@
 		        questionForm.style.display = 'block';
 		    } else {
 		        questionForm.reset(); 
+		        $('#saveButton').text('Save');
 		        localStorage.removeItem("questionId");
-		       
+		        
 		    }
 		});
 
@@ -439,7 +440,7 @@
 		        } else {
 		            alert('Exam added successfully without questions and answers!');
 		        }
-		
+				
 		        RefreshTable();
 			});
 						
@@ -471,68 +472,8 @@
 	
 	//question details
 	let questionIdValue;
-	$(document).ready(function() {
-        $('.questionLink').click(function(e) {
-            e.preventDefault(); 
-
-            var questionId = $(this).data('question-id');
-
-            $.ajax({
-                url: '/getQuestionAndAnswersById/' + questionId,
-                type: 'GET',
-                dataType: 'json',
-                success: function(response) {
-					console.log(response);
-					$('#quesId').val(response.questionId);
-                    $('#question_content').val(response.question);
-                    $('#answer1').val(response.answers[0].answer);
-                    $('#answer2').val(response.answers[1].answer);
-                    $('#answer3').val(response.answers[2].answer);
-                    $('#answer4').val(response.answers[3].answer);
-                    
-                    localStorage.setItem('questionId',response.questionId);
-                    localStorage.setItem('answer1',response.answers[0].answerId);
-                    localStorage.setItem('answer2',response.answers[1].answerId);
-                    localStorage.setItem('answer3',response.answers[2].answerId);
-                    localStorage.setItem('answer4',response.answers[3].answerId);
-                    questionIdValue = response.questionId;
-                    // console.log('Question ID assigned inside AJAX success:', questionIdValue);
-                    
-                    response.answers.forEach(function(answer, index) {
-				        var radioValue = 'answer' + (index + 1);
-				        var radio = $('input[type="radio"][value="' + radioValue + '"]');
-				        
-				        if (answer.correctAnswer) {
-				            radio.prop('checked', true);
-				            radio.parent().addClass('correct-answer'); 
-				        } else {
-				            radio.parent().removeClass('correct-answer');
-				        }
-				        
-				    });
-                    //$('#answerContent').text(response.answers.join(', '));
-                    //$('#questionDetailsModal').modal('show'); 
-                },
-                error: function(xhr, status, error) {
-                    console.log('Error:', error);
-                    
-                }
-            });
-        });
-    });
-   
-   //refresh the question table
-	function RefreshTable() {
-	    console.log('Refreshing table...');
-	    $("#questable tbody").load(location.href + " #questable tbody > *", function() {
-	        console.log('Table refreshed.');
-	        // Reattach click handlers to newly loaded question links
-	        $('.questionLink').click(function(e) {
-	            e.preventDefault(); 
-	
-	            var questionId = $(this).data('question-id');
-	
-	            $.ajax({
+	function loadQuestionAndAnswers(questionId) {
+		$.ajax({
 	                url: '/getQuestionAndAnswersById/' + questionId,
 	                type: 'GET',
 	                dataType: 'json',
@@ -563,12 +504,36 @@
 				        }
 				        
 				    });
+				    $('#saveButton').text('Update');
 	                    
 	                },
 	                error: function(xhr, status, error) {
 	                    console.log('Error:', error);
 	                }
 	            });
+	}
+	$(document).ready(function() {
+        $('.questionLink').click(function(e) {
+            e.preventDefault(); 
+
+            var questionId = $(this).data('question-id');
+
+            loadQuestionAndAnswers(questionId);
+        });
+    });
+   
+   //refresh the question table
+	function RefreshTable() {
+	    console.log('Refreshing table...');
+	    $("#questable tbody").load(location.href + " #questable tbody > *", function() {
+	        console.log('Table refreshed.');
+	        
+	        $('.questionLink').click(function(e) {
+	            e.preventDefault(); 
+	
+	            var questionId = $(this).data('question-id');
+	
+	            loadQuestionAndAnswers(questionId);
 	        });
 	    });
 	}
