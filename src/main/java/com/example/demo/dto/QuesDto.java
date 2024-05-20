@@ -15,20 +15,17 @@ public class QuesDto {
     private AnswerDto answer3;
     private AnswerDto answer4;
    
-    
-	public QuesDto(@JsonProperty("questionId") int questionId, @JsonProperty("question") String question,
-			@JsonProperty("answer1") AnswerDto answer1, @JsonProperty("answer2") AnswerDto answer2,
-			@JsonProperty("answer3") AnswerDto answer3,@JsonProperty("answer4") AnswerDto answer4) {
-		super();
-		this.questionId = questionId;
-		this.question = question;
-		this.answer1 = answer1;
-		this.answer2 = answer2;
-		this.answer3 = answer3;
-		this.answer4 = answer4;
-		
+    public QuesDto(@JsonProperty("questionId") int questionId, @JsonProperty("question") String question,
+            @JsonProperty("answers") List<AnswerDto> answers) {
+		 super();
+		 this.questionId = questionId;
+		 this.question = question;
+		 this.answer1 = answers.size() > 0 ? answers.get(0) : null;
+		 this.answer2 = answers.size() > 1 ? answers.get(1) : null;
+		 this.answer3 = answers.size() > 2 ? answers.get(2) : null;
+		 this.answer4 = answers.size() > 3 ? answers.get(3) : null;
 	}
-	
+		
 	public String getQuestion() {
 		return question;
 	}

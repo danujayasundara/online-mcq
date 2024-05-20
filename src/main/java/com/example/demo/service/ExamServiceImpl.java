@@ -92,7 +92,7 @@ public class ExamServiceImpl implements ExamService{
 		  
 		  Exam response = null;
 	        // Save exam details
-		  if(examdto.getExamId() == -1 || examdto.getExamId() == ' ') {
+		  if(examdto.getExamId() == -1) {
 				Exam newExam = new Exam();
 				newExam.setExam_name(examdto.getExamName());
 				newExam.setDuration(examdto.getDuration());
@@ -149,6 +149,7 @@ public class ExamServiceImpl implements ExamService{
 				
 		  	} else { //existing exam nam
 		  		Long examId = (long) examdto.getExamId();
+		  		System.out.println("ExamID***.....----" + examId);
 	  			DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
 		        // Parse the string to LocalDateTime
@@ -255,12 +256,6 @@ public class ExamServiceImpl implements ExamService{
 	        return response;
 	    }
 	  
-	  //update existing exam
-	  public Exam updateExam(ExamDto examdto) {
-		  return saveExam(examdto);
-	    }
-	  
-	 
 	  
 	  //load  data
 	  /*public Exam getExamDetailsById(Long examId) {

@@ -6,6 +6,7 @@
   <title>Single Exam</title>
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" th:href="@{../css/styles.css}">
+  <!--<script src="/js/newTeacherExam.js"></script>-->
   <style>
     .navbar {
       justify-content: flex-start; 
@@ -126,7 +127,7 @@
 		        <!--<form th:action="@{/addQuestion}" method="post">
 		        	<a th:href="@{/addQuestion(examId=${exam.exam_id})}" type="submit" id="addQuestionBtn" class="btn btn-success">Add Question</a>
 		        </form>-->
-		      <!--  <button id="addQuestionBtn">Add Question</button> -->
+		      <button id="addQuestionBtn">Add Question</button>
 		    </div>
             <div id="singlemiddletable">
               <table id="questable" class="table">
@@ -144,7 +145,7 @@
 	               		 th:text="${question.question_content}" th:attr="data-questionId=${question.question_id}"
 	               		 th:onclick="'handleQuestionLinkClick(event, ' + ${question.question_id} + ')'"></a>
                		 </td>
-		             <td>            
+		             <td id = "correctAns">            
 					    <span th:each="answer : ${question.answers}">
 					        <span th:if="${answer.correctAnswer}" th:text = "${answer.answer}">
 					         
@@ -178,7 +179,7 @@
           </div>
           <div class="col-sm-12 col-md-12 col-lg-4" >
             <div class="singlrright">
-              <form th:action="@{/saveQuestion}" method="post" id="questionForm" > <!--style="display: none;"-->
+              <form style="display: none;" th:action="@{/saveQuestion}" method="post" id="questionForm" > <!--style="display: none;"-->
               
 			    <input type="text" id = "question_content" name="question_content" placeholder="Enter question " th:value="${question_content}" required>
 			    
@@ -205,7 +206,7 @@
 			    </div>   
 			    
 			</form>
-			<button id="addQuestionBtn">Add Question</button>
+			
 			<button type="submit" value ="submit" id= "saveButton">Save</button>
 			
             </div>
@@ -319,6 +320,18 @@
 			}
 			document.getElementById('publish').onclick=publishExam;
 		});
+		
+		 document.getElementById('addQuestionBtn').addEventListener('click', function() {
+		    var questionForm = document.getElementById('questionForm');
+		    if (questionForm.style.display === 'none' || questionForm.style.display === '') {
+		        questionForm.style.display = 'block';
+		    } else {
+		        questionForm.reset(); 
+		        localStorage.removeItem("questionId");
+		       
+		    }
+		});
+
 
 	    $(document).ready(function () { 
 			let questionIdOld = null;
@@ -336,247 +349,102 @@
 		
 			const storedExamdate= localStorage.getItem('examDateTime');
 			console.log('Stored **** Exam date:', storedExamdate);*/
-			
-			
-		function saveQuestion() {
-		    const questionInput = document.getElementById('question_content').value;
-		    const answer1Input = document.getElementById('answer1').value;
-		    const answer2Input = document.getElementById('answer2').value;
-		    const answer3Input = document.getElementById('answer3').value;
-		    const answer4Input = document.getElementById('answer4').value;
-		    const correctAnswerInput = document.querySelector('input[name="correctAnswer"]:checked');
+			$('#saveButton').click(function () {
+	        // Extract exam details
+		        const examName = $('#inputExam').val();
+		        const examDateTime = $('#examDateTime').val();
+		        const examDuration = $('#examDuration').val();
 		
-		    if (!correctAnswerInput) {
-		        alert('Please select the correct answer.');
-		        return;
-		    }
+		        const questionInput = document.getElementById('question_content').value;
+		        const answer1Input = document.getElementById('answer1').value;
+		        const answer2Input = document.getElementById('answer2').value;
+		        const answer3Input = document.getElementById('answer3').value;
+		        const answer4Input = document.getElementById('answer4').value;
+		        const correctAnswerInput = document.querySelector('input[name="correctAnswer"]:checked');
 		
-		    const correctAnswerValue = correctAnswerInput.value;
-		    const oldQId = localStorage.getItem('questionId');
-		    let questions = JSON.parse(localStorage.getItem('questions')) || [];
-		    const existingQuestion = questions.find(q => q.questionId === oldQId);
-		    const oldAns1 = localStorage.getItem('answer1');
-		    const oldAns2 = localStorage.getItem('answer2');
-		    const oldAns3 = localStorage.getItem('answer3');
-		    const oldAns4 = localStorage.getItem('answer4');
-		    
-		    const answers = [
-		        { 
-		            answerId: (oldAns1 === null) ? -1 : parseInt(oldAns1),
-		            answer: answer1Input, 
-		            key: "answer1", 
-		            isCorrectAnswer: correctAnswerValue === 'answer1' 
-		        },
-		        { 
-		            answerId: (oldAns2 === null) ? -1 : parseInt(oldAns2),
-		            answer: answer2Input, 
-		            key: "answer2", 
-		            isCorrectAnswer: correctAnswerValue === 'answer2' 
-		        },
-		        { 
-		            answerId: (oldAns3 === null) ? -1 : parseInt(oldAns3),
-		            answer: answer3Input, 
-		            key: "answer3", 
-		            isCorrectAnswer: correctAnswerValue === 'answer3' 
-		        },
-		        { 
-		            answerId: (oldAns4 === null) ? -1 : parseInt(oldAns4),
-		            answer: answer4Input, 
-		            key: "answer4", 
-		            isCorrectAnswer: correctAnswerValue === 'answer4' 
+		        const hasQuestions = questionInput.trim() !== '' && answer1Input.trim() !== '' &&
+		                             answer2Input.trim() !== '' && answer3Input.trim() !== '' &&
+		                             answer4Input.trim() !== '' && correctAnswerInput;
+		
+		        let questionsData = [];
+		        if (hasQuestions) {
+		            const correctAnswerValue = correctAnswerInput.value;
+		            const oldQId = localStorage.getItem('questionId');
+				    const oldAns1 = localStorage.getItem('answer1');
+				    const oldAns2 = localStorage.getItem('answer2');
+				    const oldAns3 = localStorage.getItem('answer3');
+				    const oldAns4 = localStorage.getItem('answer4');
+		
+		            const answers = [
+				            { 
+				                answerId: (oldAns1 === null) ? -1 : parseInt(oldAns1),
+				                answer: answer1Input, 
+				                key: "answer1", 
+				                isCorrectAnswer: correctAnswerValue === 'answer1' 
+				            },
+				            { 
+				                answerId: (oldAns2 === null) ? -1 : parseInt(oldAns2),
+				                answer: answer2Input, 
+				                key: "answer2", 
+				                isCorrectAnswer: correctAnswerValue === 'answer2' 
+				            },
+				            { 
+				                answerId: (oldAns3 === null) ? -1 : parseInt(oldAns3),
+				                answer: answer3Input, 
+				                key: "answer3", 
+				                isCorrectAnswer: correctAnswerValue === 'answer3' 
+				            },
+				            { 
+				                answerId: (oldAns4 === null) ? -1 : parseInt(oldAns4),
+				                answer: answer4Input, 
+				                key: "answer4", 
+				                isCorrectAnswer: correctAnswerValue === 'answer4' 
+				            }
+				        ];
+		
+		            const questionData = {
+						questionId: oldQId === null ? -1 : oldQId,
+		                question: questionInput,
+		                answers: answers
+		            };
+		
+		            questionsData.push(questionData);
 		        }
-		    ];
-
-  
-		    const questionData = {
-		        question: questionInput,
-		        answers: answers
-		    };
-		   
-		    questions.push(questionData);
-		    
-		    localStorage.setItem('questions', JSON.stringify(questions));
-		    document.getElementById('questionForm').reset();
-		    alert('Question added successfully!');
-		}
-
-    //document.getElementById('questionForm').reset();
-
-    // alert('Question added successfully!');
-
-
-	
-	    $('#addQuestionBtn').click(saveQuestion);
-	    
-	 	// const questionId = $('#quesId').val();
-		// console.log('QId**',questionId);
-		// console.log('QIPLDd**',questionIdOld);
 		
+		        const examData = {
+		            examId: examId2 === null ? -1 : examId2,
+		            examName: examName,
+		            examDateTime: examDateTime,
+		            examDuration: examDuration,
+		            lastUpdateTime: new Date().toISOString().slice(0, -2),
+		            questions: questionsData
+		        };
 		
-	    	if(examId2 === null){
-				$('#saveButton').click(function () {
-					//updateExam();
-			        const examName = $('#inputExam').val();
-			        const examDateTime = $('#examDateTime').val();
-			        const examDuration = $('#examDuration').val();
-			       
-			        //const qid = localstorage.getItem('questionId',questionId);
-			
-			        const questions = JSON.parse(localStorage.getItem('questions')) || [];
-			        // console.log('QUEstions',questions);
-			        
-					const formattedQuestions = questions.map(question => ({
-				        	questionId: -1,
-					        question: question.question,
-					        answer1: question.answers[0],
-					        answer2: question.answers[1],
-					        answer3: question.answers[2],
-					        answer4: question.answers[3]
-					    }));
-					     
-				    const lastUpdateTime = new Date().toISOString().slice(0, -2);
-			
-			        const examData = {
-						examId: -1,
-			            examName: examName,
-			            examDateTime: examDateTime,
-			            examDuration: examDuration,
-			            lastUpdateTime: lastUpdateTime,
-			            questions: formattedQuestions
-			        };
-			
-			        $.ajax({
-			            type: 'POST',
-			            url: '/saveExam',
-			            contentType: 'application/json',
-			            data: JSON.stringify(examData),
-			            success: function (response) {
-			                console.log(response);
-			                if (response && response.examDtoRes && response.examDtoRes.question) {
-			                    updateQuestionTable(response.examDtoRes.question);
-			                    
-			                }
-			            },
-			            error: function (xhr, status, error) {
-			                console.error(xhr.responseText);
-			            }
-			        });
-			        alert('Exam added successfully!');
-			        localStorage.removeItem("questions");
-			        localStorage.removeItem("questionId");
-			    });
-			}else{
-				$('#saveButton').click(function () {
-					//updateExam();
-			        const examName = $('#inputExam').val();
-			        const examDateTime = $('#examDateTime').val();
-			        const examDuration = $('#examDuration').val();
-					
-					// const questionId = localstorage.getItem('questionId',questionId)
-			        const questions = JSON.parse(localStorage.getItem('questions')) || [];
-			      	const oldQId = localStorage.getItem('questionId');
-			        if (oldQId === null){
-						const formattedQuestions = questions.map(question => ({
-					        	questionId: -1,
-						        question: question.question,
-						        answer1: question.answers[0],
-						        answer2: question.answers[1],
-						        answer3: question.answers[2],
-						        answer4: question.answers[3]
-						    }));
-						    
-				    const lastUpdateTime = new Date().toISOString().slice(0, -2);
-			
-			        const examData = {
-						examId: examId2,
-			            examName: examName,
-			            examDateTime: examDateTime,
-			            examDuration: examDuration,
-			            lastUpdateTime: lastUpdateTime,
-			            questions: formattedQuestions
-			        };
-			
-			        $.ajax({
-			            type: 'POST',
-			            url: '/saveExam',
-			            contentType: 'application/json',
-			            data: JSON.stringify(examData),
-			            success: function (response) {
-			                console.log(response);
-			                if (response && response.examDtoRes && response.examDtoRes.question) {
-			                    updateQuestionTable(response.examDtoRes.question); 
-			                    
-			                }
-			            },
-			            error: function (xhr, status, error) {
-			                console.error(xhr.responseText);
-			            }
-			        });
-			        alert('Exam added successfully!');
-			        localStorage.removeItem("questions");
-			        localStorage.removeItem("questionId");
-			        
-					}else{
-						const formattedQuestions = questions.map(question => ({
-					        	questionId: oldQId,
-						        question: question.question,
-						        answer1: question.answers[0],
-						        answer2: question.answers[1],
-						        answer3: question.answers[2],
-						        answer4: question.answers[3]
-						    }));
-						    
-				    const lastUpdateTime = new Date().toISOString().slice(0, -2);
-				
-			        const examData = {
-						examId: examId2,
-			            examName: examName,
-			            examDateTime: examDateTime,
-			            examDuration: examDuration,
-			            lastUpdateTime: lastUpdateTime,
-			            questions: formattedQuestions
-			        };
-			
-			        $.ajax({
-			            type: 'POST',
-			            url: '/saveExam',
-			            contentType: 'application/json',
-			            data: JSON.stringify(examData),
-			            success: function (response) {
-			                console.log(response);
-			                if (response && response.examDtoRes && response.examDtoRes.question) {
-			                    updateQuestionTable(response.examDtoRes.question); 
-			                    
-			                }
-			            },
-			            error: function (xhr, status, error) {
-			                console.error(xhr.responseText);
-			            }
-			        });
-			        alert('Exam added successfully!');
-			        localStorage.removeItem("questions");
-			        localStorage.removeItem("questionId");
-				  }
-					
-			    });
-			}
+		        $.ajax({
+		            type: 'POST',
+		            url: '/saveExam',
+		            contentType: 'application/json',
+		            data: JSON.stringify(examData),
+		            success: function (response) {
+		                console.log(response);
+		                localStorage.removeItem("questionId");
+		            },
+		            error: function (xhr, status, error) {
+		                console.error(xhr.responseText);
+		            }
+		        });
 		
+		        if (hasQuestions) {
+		            alert('Exam with questions and answers added successfully!');
+		        } else {
+		            alert('Exam added successfully without questions and answers!');
+		        }
+		
+		        RefreshTable();
+			});
+						
 	    });
-	    
-	    /*
-	    function updateQuestionTable(questions) {
-        const tableBody = document.querySelector('#questable tbody');
-        questions.forEach(question => {
-            const correctAnswer = question.answers.find(answer => answer.correctAnswer).answer;
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td><a href="#" class="questionLink" data-question-id="${question.questionId}">${question.question}</a></td>
-                <td>${correctAnswer}</td>
-            `;
-            tableBody.appendChild(row);
-        });
-    } */
-	    
+	   
     let examIdValue;
     //exam details
     $(document).ready(function() {
@@ -653,9 +521,58 @@
         });
     });
    
+   //refresh the question table
+	function RefreshTable() {
+	    console.log('Refreshing table...');
+	    $("#questable tbody").load(location.href + " #questable tbody > *", function() {
+	        console.log('Table refreshed.');
+	        // Reattach click handlers to newly loaded question links
+	        $('.questionLink').click(function(e) {
+	            e.preventDefault(); 
 	
+	            var questionId = $(this).data('question-id');
 	
-	
+	            $.ajax({
+	                url: '/getQuestionAndAnswersById/' + questionId,
+	                type: 'GET',
+	                dataType: 'json',
+	                success: function(response) {
+	                    console.log(response);
+	                    $('#quesId').val(response.questionId);
+	                    $('#question_content').val(response.question);
+	                    $('#answer1').val(response.answers[0].answer);
+	                    $('#answer2').val(response.answers[1].answer);
+	                    $('#answer3').val(response.answers[2].answer);
+	                    $('#answer4').val(response.answers[3].answer);
+	                    $('#correctAns').val(response.correctAnswer);
+	                    localStorage.setItem('questionId', response.questionId);
+	                    localStorage.setItem('answer1',response.answers[0].answerId);
+	                    localStorage.setItem('answer2',response.answers[1].answerId);
+	                    localStorage.setItem('answer3',response.answers[2].answerId);
+	                    localStorage.setItem('answer4',response.answers[3].answerId);
+	                    
+	                    response.answers.forEach(function(answer, index) {
+				        var radioValue = 'answer' + (index + 1);
+				        var radio = $('input[type="radio"][value="' + radioValue + '"]');
+				        
+				        if (answer.correctAnswer) {
+				            radio.prop('checked', true);
+				            radio.parent().addClass('correct-answer'); 
+				        } else {
+				            radio.parent().removeClass('correct-answer');
+				        }
+				        
+				    });
+	                    
+	                },
+	                error: function(xhr, status, error) {
+	                    console.log('Error:', error);
+	                }
+	            });
+	        });
+	    });
+	}
+
 	// fetch the duration
 	$.ajax({
 	    type: 'GET',
@@ -693,7 +610,7 @@
                 e.preventDefault();
             });
         });
-
+        
   </script>
   
 </body>

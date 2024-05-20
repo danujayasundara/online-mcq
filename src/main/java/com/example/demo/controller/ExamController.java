@@ -167,14 +167,14 @@ public class ExamController {
 				/*String examJson = mapper.writeValueAsString(exam);
 				System.out.println("Serialized Exam JSON: " + examJson);*/
 				
-				ExamDtoRes examdtoRes = new ExamDtoRes();
+				/*ExamDtoRes examdtoRes = new ExamDtoRes();
 				examdtoRes.setExamId(savedExam.getExam_id());
 				examdtoRes.setExamName(savedExam.getExam_name());
 				examdtoRes.setDuration(savedExam.getDuration());
 				
 				DateTimeFormatter customFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 				String customFormattedDate = savedExam.getDateTime().format(customFormatter);
-				examdtoRes.setDateTime(customFormattedDate);
+				examdtoRes.setDateTime(customFormattedDate);*/
 				
 		        
 			/*
@@ -218,39 +218,13 @@ public class ExamController {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-	        
-		  
 		  	//System.out.println("Ab");
 		
 		  	return "redirect:/newExamTeacher";
 		  	//return null;
 	    }
 	  
-	  //update existing exam
-	 @PutMapping("/updateExam/{examId}")
-	  public ResponseEntity<Exam> updateExam(@PathVariable Long examId,@RequestBody String req) {
-		  ObjectMapper mapper = new ObjectMapper();
-		  mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-	        ExamDto exam;
-			try {
-				exam = mapper.readValue(req, ExamDto.class);
-				System.out.println("FROM FRONTEND for update" +req);
-				System.out.println(exam.getDuration());
-				System.out.println(exam.getDateTime());
-				System.out.println(exam.getExamName());
-				
-				Exam updatedExam = examServiceImpl.updateExam(exam);
-				return ResponseEntity.ok(updatedExam);	
-			
-			} catch (JsonProcessingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return ResponseEntity.notFound().build();
-			}
-			
-	    }
-	  
-	  
+	
 	  private Long getUserIdByEmail(String email) {
 		  return userRepository.findByEmail(email).getId();
 	  }
