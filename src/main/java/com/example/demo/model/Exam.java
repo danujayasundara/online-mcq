@@ -40,7 +40,7 @@ public class Exam {
 	
 	@OneToMany(mappedBy = "exam", fetch = FetchType.EAGER)
 	@JsonIgnore
-	private List<Question> questions;
+	private List<Question> questions = new ArrayList<>();
 
 	public Exam() {
 		super();

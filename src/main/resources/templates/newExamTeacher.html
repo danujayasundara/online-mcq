@@ -130,6 +130,7 @@
 		      <button id="addQuestionBtn">Add Question</button>
 		    </div>
             <div id="singlemiddletable">
+           
               <table id="questable" class="table">
                 <thead>
                   <tr>
@@ -137,7 +138,7 @@
                     <th>Answer</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody id="questionTableBody">
 	               <tr th:each="question : ${questions}" th:id="'question_' + ${question.question_id}"
 	               data-questionId="${question.question_id}" th:onclick="'populateForm(' + ${question.question_id} + ')'" class="question-row">
 	            	<td>
@@ -155,7 +156,7 @@
 		        </tr>
                 </tbody>
               </table>
-              
+            
             </div>
             <form id = "examForm" th:action="@{/saveExam}" th:object="${exam}" method="post" class="form-inline">
             
@@ -247,7 +248,7 @@
 		// Get examId and userId from URL parameters
 		const examId2 = getParameterByName('examId');
 		console.log('Exam id******'+examId2);
-		
+		let eId = null;
 			
 		if (selectedExamId) {
 		    console.log('Selected Exam ID:', selectedExamId);
@@ -335,23 +336,13 @@
 
 
 	    $(document).ready(function () { 
-			let questionIdOld = null;
-			$('.questionLink').on('click', function(event) {
-		        event.preventDefault(); 
-		        questionIdOld = $(this).data('questionid');
-		
-		        $('#quesId').val(questionIdOld);
-		
-		        console.log('Question ID:', questionIdOld);
-		    });
-	
-			/*const storedExamId = localStorage.getItem('examId');
-			console.log('Stored **** Exam ID:', storedExamId);
-		
-			const storedExamdate= localStorage.getItem('examDateTime');
-			console.log('Stored **** Exam date:', storedExamdate);*/
+			$(document).on('click', '.questionLink', function(e) {
+	        e.preventDefault();
+	        var questionId = $(this).data('question-id');
+	        loadQuestionAndAnswers(questionId);
+	    });
+			
 			$('#saveButton').click(function () {
-	        // Extract exam details
 		        const examName = $('#inputExam').val();
 		        const examDateTime = $('#examDateTime').val();
 		        const examDuration = $('#examDuration').val();
@@ -411,9 +402,10 @@
 		
 		            questionsData.push(questionData);
 		        }
-		
+				
+				 
 		        const examData = {
-		            examId: examId2 === null ? -1 : examId2,
+		            examId: eId !== null && eId !== undefined ? eId : -1,
 		            examName: examName,
 		            examDateTime: examDateTime,
 		            examDuration: examDuration,
@@ -429,6 +421,19 @@
 		            success: function (response) {
 		                console.log(response);
 		                localStorage.removeItem("questionId");
+		                const newExamId = response.examId;
+		                localStorage.setItem('examIdRes',newExamId);
+		                getExamDetails(newExamId);
+		                RefreshTableToGetQues(newExamId);
+		                eId = newExamId; 
+        				console.log('ExamId for replace from save function', eId);
+        				
+        				const questionDetails = response.questions; 
+			
+			            questionDetails.forEach(question => {
+			                const questionLinkHtml = `<a href="#" class="questionLink" data-question-id="${question.questionId}">${question.question}</a><br>`;
+			                $('#questable').append(questionLinkHtml);
+			            });
 		            },
 		            error: function (xhr, status, error) {
 		                console.error(xhr.responseText);
@@ -441,14 +446,51 @@
 		            alert('Exam added successfully without questions and answers!');
 		        }
 				
-		        RefreshTable();
 			});
 						
 	    });
 	   
     let examIdValue;
     //exam details
-    $(document).ready(function() {
+    function getExamDetails(examId) {
+	    return $.ajax({
+	        url: '/exam/' + examId,
+	        type: 'GET',
+	        dataType: 'json',
+	        success: function(response) {
+	            console.log('Exam Details:', response);
+	            $('#examDateTime').val(response.dateTime);
+	            $('#inputExam').val(response.examName);
+	            $('#examId').val(response.examId);
+	            localStorage.setItem('examId', response.examId);
+	            localStorage.setItem('examDateTime', response.dateTime);
+	            
+	            var questionsTable = $('#questable tbody');
+	            response.question.forEach(function(question) {
+	                var correctAnswer = '';
+	                question.answers.forEach(function(answer) {
+	                    if (answer.correctAnswer) {
+	                        correctAnswer = answer.answer;
+	                    }
+	                });
+	
+	                var newRow = '<tr id="question_' + question.questionId + '" data-questionId="' + question.questionId + '">' +
+	                    '<td><a href="#" id="questionLink' + question.questionId + '" class="questionLink" ' +
+	                    'data-question-id="' + question.questionId + '" onclick="handleQuestionLinkClick(event, ' +
+	                    question.questionId + ')">' + question.question + '</a></td>' +
+	                    '<td>' + correctAnswer + '</td>' +
+	                    '</tr>';
+	                questionsTable.append(newRow);
+	                
+	            });
+	        },
+	        error: function(xhr, status, error) {
+	        console.log('Error:', error);
+	        }
+	    });
+	}
+	
+	$(document).ready(function() {
 	    $.ajax({
 	        url: '/exam/' + examId2, 
 	        type: 'GET',
@@ -460,6 +502,8 @@
 	            $('#examDateTime').val(response.dateTime);
 	            $('#inputExam').val(response.examName);
 	            $('#examId').val(response.examId);
+	            eId = response.examId;  
+            	console.log('ExamId for replace from getDetails', eId);
 	             examIdValue = response.examId;
 	        },
 	        error: function(xhr, status, error) {
@@ -467,8 +511,6 @@
 	        }
 	    });
 	});
-	
-	
 	
 	//question details
 	let questionIdValue;
@@ -523,8 +565,8 @@
     });
    
    //refresh the question table
-	function RefreshTable() {
-	    console.log('Refreshing table...');
+	function RefreshTableToGetQues(examId) {
+	    console.log('Refreshing table for examId:', examId);
 	    $("#questable tbody").load(location.href + " #questable tbody > *", function() {
 	        console.log('Table refreshed.');
 	        
@@ -532,7 +574,6 @@
 	            e.preventDefault(); 
 	
 	            var questionId = $(this).data('question-id');
-	
 	            loadQuestionAndAnswers(questionId);
 	        });
 	    });

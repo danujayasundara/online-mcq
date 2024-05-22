@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -131,99 +132,48 @@ public class ExamController {
 	  
 	  //save exam
 	  @PostMapping("/saveExam")
-	  public String saveExam(@RequestBody String req) {
-			 
-		  /*var response = {
-				  redirectionPath: "",
-				  
-		  }*/
-		  
-		  ObjectMapper mapper = new ObjectMapper();
-		  mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-	        ExamDto exam;
-			try {
-				exam = mapper.readValue(req, ExamDto.class);
-				System.out.println("FROM FRONTEND " +req);
-				System.out.println(exam.getDuration());
-				System.out.println(exam.getDateTime());
-				System.out.println(exam.getExamName());
-				//System.out.println(exam.getQuestion().get(0));
-				//System.out.println(exam.getQuestion().getAnswer1().getAnswer());
-				
-				Exam savedExam = examServiceImpl.saveExam(exam);
-				
-				/*Long id = savedExam.getExam_id();
-				Exam e = examServiceImpl.getExamDetailsById(id);
-				System.out.println("New saved exam");
-				System.out.println(e);
-				
-				/*Long id = savedExam.getExam_id();
-				Exam e = examServiceImpl.getExamDetailsById(id);
-				System.out.println("New saved exam");
-				System.out.println(e.getExam_name());
-				System.out.println(e.getExam_id());
-				System.out.println(e.getQuestions());*/
-				
-				/*String examJson = mapper.writeValueAsString(exam);
-				System.out.println("Serialized Exam JSON: " + examJson);*/
-				
-				/*ExamDtoRes examdtoRes = new ExamDtoRes();
-				examdtoRes.setExamId(savedExam.getExam_id());
-				examdtoRes.setExamName(savedExam.getExam_name());
-				examdtoRes.setDuration(savedExam.getDuration());
-				
-				DateTimeFormatter customFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-				String customFormattedDate = savedExam.getDateTime().format(customFormatter);
-				examdtoRes.setDateTime(customFormattedDate);*/
-				
-		        
-			/*
-				List<QuesDtoRes> questionDtoResList = new ArrayList<>();
-				for (Question question : savedExam.getQuestions()) {
-				    QuesDtoRes questionRes = new QuesDtoRes();
-				    questionRes.setQuestionId(question.getQuestion_id()); 
-				    questionRes.setQuestion(question.getQuestion_content());
+	  public ResponseEntity<Map<String, Object>> saveExam(@RequestBody String req) {
+	      ObjectMapper mapper = new ObjectMapper();
+	      mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	      ExamDto exam;
+	      try {
+	          exam = mapper.readValue(req, ExamDto.class);
+	          System.out.println("FROM FRONTEND " + req);
+	          System.out.println(exam.getDuration());
+	          System.out.println(exam.getDateTime());
+	          System.out.println(exam.getExamName());
 
-				    List<AnswerDtoRes> answerDtoResList = new ArrayList<>();
-				    for (Answer answer : question.getAnswers()) {
-				        AnswerDtoRes answerRes = new AnswerDtoRes();
-				        answerRes.setAnswerId(answer.getAnswer_id());
-				        answerRes.setAnswer(answer.getAnswer());
-				        answerRes.setCorrectAnswer(answer.getCorrectAnswer());
-				        answerDtoResList.add(answerRes);
-				    }
-				    questionRes.setAnswer1(answerDtoResList.get(0)); 
-				    questionRes.setAnswer2(answerDtoResList.get(1));
-				    questionRes.setAnswer3(answerDtoResList.get(2));
-				    questionRes.setAnswer4(answerDtoResList.get(3)); 
+	          Exam savedExam = examServiceImpl.saveExam(exam);
 
-				    questionDtoResList.add(questionRes);
-				}
+	          // Safeguard against null questions list
+	          List<Question> questions = savedExam.getQuestions();
+	          List<Long> questionIds = questions != null 
+	              ? questions.stream().map(Question::getQuestion_id).collect(Collectors.toList()) 
+	              : Collections.emptyList();
 
-				examdtoRes.setQuestion(questionDtoResList);
-				
-				RequestDto response = new RequestDto();
-		        response.setDirectionPath("/addnewExam");
-		        response.setExamDtoRes(examdtoRes);
-				return response;
-				*/
-				//System.out.print(savedExam.getQuestions());
-				//System.out.print(savedExam.getQuestions().get(0).getQuestion_id());
-				
-				
-			} catch (JsonMappingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (JsonProcessingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		  	//System.out.println("Ab");
-		
-		  	return "redirect:/newExamTeacher";
-		  	//return null;
-	    }
-	  
+	          Map<String, Object> response = new HashMap<>();
+	          response.put("status", "success");
+	          response.put("examId", savedExam.getExam_id());
+	          response.put("questionIds", questionIds);
+
+	          return ResponseEntity.ok(response);
+
+	      } catch (JsonMappingException e) {
+	          e.printStackTrace();
+	          Map<String, Object> response = new HashMap<>();
+	          response.put("status", "error");
+	          response.put("message", e.getMessage());
+	          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+	      } catch (JsonProcessingException e) {
+	          e.printStackTrace();
+	          Map<String, Object> response = new HashMap<>();
+	          response.put("status", "error");
+	          response.put("message", e.getMessage());
+	          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+	      }
+	  }
+
+
 	
 	  private Long getUserIdByEmail(String email) {
 		  return userRepository.findByEmail(email).getId();
@@ -387,6 +337,7 @@ public class ExamController {
 	        try {
 	            ExamDtoRes examDto = examServiceImpl.getExamDetailsById(examId);
 	            System.out.println("Exam Details *****" +examDto);
+	            System.out.println("Question Details *****" +examDto.getQuestion().get(0).getQuestionId());
 	            model.addAttribute("examDto", examDto);
 	            return ResponseEntity.ok(examDto);
 	        } catch (NotFoundException e) {
